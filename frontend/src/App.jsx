@@ -20,7 +20,7 @@ function App() {
 
   // Fetch profile data
   useEffect(() => {
-    const fetchProfile = async () => {
+    const loadProfile = async () => {
       try {
         setLoading(prev => ({ ...prev, profile: true }));
         const data = await fetchProfile();
@@ -34,12 +34,12 @@ function App() {
       }
     };
 
-    fetchProfile();
+    loadProfile();
   }, []);
 
   // Fetch Python projects
   useEffect(() => {
-    const fetchPythonProjects = async () => {
+    const loadPythonProjects = async () => {
       try {
         setLoading(prev => ({ ...prev, pythonProjects: true }));
         const data = await fetchPythonProjects();
@@ -53,7 +53,7 @@ function App() {
       }
     };
 
-    fetchPythonProjects();
+    loadPythonProjects();
   }, []);
 
   // Handle search
