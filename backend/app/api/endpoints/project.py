@@ -16,7 +16,9 @@ def list_projects(
     query = db.query(DBProject)
     
     if skill:
-        query = query.join(DBProject.skills).filter(DBSkill.name.ilike(f"%{skill}%"))
+        # Normalize skill name to lowercase for case-insensitive exact matching
+        normalized_skill = skill.lower().strip()
+        query = query.join(DBProject.skills).filter(DBSkill.name.ilike(normalized_skill))
     
     return query.all()
 
@@ -25,20 +27,19 @@ def search_projects(
     q: str = Query(..., min_length=1),
     db: Session = Depends(get_db)
 ):
-    results = {
-        "projects": [],
-        "skills": []
-    }
+    # Convert query to lowercase for case-insensitive search
+    search_term = f"%{q.lower()}%"
     
-    # Search projects
-    projects = db.query(DBProject).filter(
-        (DBProject.title.ilike(f"%{q}%")) |
-        (DBProject.description.ilike(f"%{q}%"))
-    ).all()
+    # Search projects by title, description, or associated skills
+    projects = db.query(DBProject).join(DBProject.skills).filter(
+        (DBProject.title.ilike(search_term)) |
+        (DBProject.description.ilike(search_term)) |
+        (DBSkill.name.ilike(search_term))
+    ).distinct().all()
     
-    # Search skills
+    # Search skills separately
     skills = db.query(DBSkill).filter(
-        DBSkill.name.ilike(f"%{q}%")
+        DBSkill.name.ilike(search_term)
     ).all()
     
     return {

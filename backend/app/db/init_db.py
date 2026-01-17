@@ -17,12 +17,12 @@ def seed_db():
             print("Database already seeded")
             return
             
-        # Create skills
-        python = Skill(name="Python")
-        fastapi = Skill(name="FastAPI")
-        sqlalchemy = Skill(name="SQLAlchemy")
-        javascript = Skill(name="JavaScript")
-        react = Skill(name="React")
+        # Create skills (all lowercase for consistency)
+        python = Skill(name="python")
+        fastapi = Skill(name="fastapi")
+        sqlalchemy = Skill(name="sqlalchemy")
+        javascript = Skill(name="javascript")
+        react = Skill(name="react")
         
         # Create projects
         project1 = Project(
