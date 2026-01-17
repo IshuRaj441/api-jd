@@ -1,28 +1,82 @@
-# Me-API Playground (Track A)
+# 🚀 Me-API Playground
 
-## Overview
-A minimal backend + frontend project for the Track A assessment.
-Demonstrates API design, database modeling, and deployment.
+## 📌 Overview
+Me-API Playground is a full-stack application developed as part of the Track A assessment. This project showcases modern API design principles, efficient database modeling, and seamless deployment strategies. The application serves as a professional portfolio platform with a focus on clean architecture and maintainable code.
 
-## Live URLs
-- **Backend**: https://me-api-playground.onrender.com
-- **Frontend**: https://me-api-playground.netlify.app
+## 🌐 Live Deployment
 
-## Architecture
+| Environment | URL | Status |
+|-------------|-----|--------|
+| Production API | [https://me-api-playground.onrender.com](https://me-api-playground.onrender.com) | [![API Status](https://img.shields.io/website?down_message=offline&label=status&up_message=online&url=https%3A%2F%2Fme-api-playground.onrender.com%2Fhealth)](https://me-api-playground.onrender.com/health) |
+| Frontend | [https://696bf889d67fda52b36ba795--superb-starship-a58eb9.netlify.app](https://696bf889d67fda52b36ba795--superb-starship-a58eb9.netlify.app) | [![Frontend Status](https://img.shields.io/website?down_message=offline&label=status&up_message=online&url=https%3A%2F%2F696bf889d67fda52b36ba795--superb-starship-a58eb9.netlify.app)](https://696bf889d67fda52b36ba795--superb-starship-a58eb9.netlify.app) |
+
+## 🏗️ System Architecture
+
+```mermaid
+graph TD
+    A[Frontend - React] -->|HTTPS| B[Backend - FastAPI]
+    B -->|SQL| C[(SQLite Database)]
+    B -->|Async Tasks| D[Background Workers]
+    
+    subgraph Frontend
+    A --> E[State Management]
+    A --> F[API Client]
+    end
+    
+    subgraph Backend
+    B --> G[Authentication]
+    B --> H[API Routes]
+    B --> I[Data Validation]
+    end
+    
+    subgraph Database
+    C --> J[Profiles]
+    C --> K[Projects]
+    C --> L[Skills]
+    end
 ```
-Frontend (React)
-   ↓
-Backend (FastAPI)
-   ↓
-SQLite Database
+
+### Key Components
+- **Frontend**: Modern React application with Vite
+- **Backend**: High-performance FastAPI server
+- **Database**: SQLite with SQLAlchemy ORM
+- **CI/CD**: Automated testing and deployment
+
+## 🛠️ Technology Stack
+
+### Backend
+- **Framework**: FastAPI (Python 3.10+)
+- **Database**: SQLite with SQLAlchemy ORM
+- **API Documentation**: OpenAPI (Swagger UI)
+- **Testing**: Pytest
+- **Dependency Management**: Poetry
+
+### Frontend
+- **Framework**: React 18
+- **Build Tool**: Vite 4.x
+- **State Management**: React Hooks
+- **Styling**: CSS Modules
+- **Package Manager**: npm / yarn
+
+### DevOps
+- **Version Control**: Git
+- **CI/CD**: GitHub Actions
+- **Backend Hosting**: Render
+- **Frontend Hosting**: Netlify
+- **Containerization**: Docker (optional)
+
+## 🔌 API Endpoints
+
+### Base URL
+```
+https://me-api-playground.onrender.com
 ```
 
-## Tech Stack
-- **Backend**: FastAPI, SQLAlchemy, SQLite
-- **Frontend**: React, Vite
-- **Deployment**: Render (Backend), Netlify (Frontend)
+### Authentication
+*Note: Authentication is not implemented in the current version.*
 
-## API Endpoints
+### Rate Limiting
+- Default: 100 requests per minute per IP address
 
 ### Profile
 - `GET /profile` - Get profile information
@@ -42,7 +96,54 @@ SQLite Database
 ### Health
 - `GET /health` - Health check endpoint
 
-## Database Schema
+## 🗃️ Database Schema
+
+### Entity Relationship Diagram
+
+```mermaid
+erDiagram
+    PROFILE ||--o{ PROJECT : has
+    PROJECT ||--|{ SKILL : has
+    
+    PROFILE {
+        int id PK
+        string name
+        string email UK
+        string education
+        string github_url
+        string linkedin_url
+        string portfolio_url
+        datetime created_at
+        datetime updated_at
+    }
+    
+    PROJECT {
+        int id PK
+        string title
+        string description
+        string links
+        int profile_id FK
+        datetime created_at
+        datetime updated_at
+    }
+    
+    SKILL {
+        int id PK
+        string name UK
+        datetime created_at
+    }
+    
+    PROJECT_SKILL {
+        int project_id PK,FK
+        int skill_id PK,FK
+    }
+```
+
+### Schema Details
+- **Profiles**: Stores user profile information
+- **Projects**: Contains project details and relationships
+- **Skills**: Tracks technical skills with many-to-many relationship to projects
+- **Project_Skills**: Junction table for projects and skills relationship
 ```
 Profile
   - id: int (PK)
@@ -84,14 +185,55 @@ The database is seeded using `seed.py` with real profile, skills, and project da
 - No rate limiting or request throttling
 - No authentication/authorization layer
 
-## Known Limitations
+## ⚠️ Current Limitations
+
+### API Limitations
+- No authentication/authorization layer
+- Limited input validation
+- No rate limiting
+- No request/response compression
+- Limited error handling
+
+### Frontend Limitations
+- Basic UI with minimal styling
+- No loading states
+- Limited error handling
+- No offline support
+- No service worker for PWA capabilities
+
+### Database Limitations
+- SQLite may not scale for high traffic
+- No read replicas
+- Limited query optimization
+- No database migrations
 - No user authentication
 - Limited input validation
 - No pagination for large result sets
 - No caching layer
 - Search is case-sensitive
 
-## Future Improvements
+## 🚧 Future Enhancements
+
+### High Priority
+- [ ] Implement JWT-based authentication
+- [ ] Add rate limiting and request throttling
+- [ ] Implement comprehensive input validation
+- [ ] Add API versioning support
+- [ ] Set up monitoring and alerting
+
+### Medium Priority
+- [ ] Add pagination for list endpoints
+- [ ] Implement caching layer with Redis
+- [ ] Add comprehensive test coverage
+- [ ] Set up CI/CD pipeline
+- [ ] Add API documentation with Swagger/OpenAPI
+
+### Low Priority
+- [ ] Containerize with Docker
+- [ ] Add database migrations
+- [ ] Implement WebSocket for real-time updates
+- [ ] Add social authentication
+- [ ] Implement file upload functionality
 - Add authentication & authorization
 - Implement pagination and caching
 - Enhance input validation
@@ -102,7 +244,88 @@ The database is seeded using `seed.py` with real profile, skills, and project da
 - Add logging and monitoring
 - Containerize the application with Docker
 
-## Setup (Local)
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Python 3.10+
+- Node.js 18+ LTS
+- npm (v9+) or yarn (v1.22+)
+- Git
+
+### Local Development Setup
+
+#### 1. Clone the Repository
+```bash
+git clone https://github.com/your-username/me-api-playground.git
+cd me-api-playground
+```
+
+#### 2. Backend Setup
+
+```bash
+# Create and activate virtual environment
+python -m venv venv
+# Windows
+.\venv\Scripts\activate
+# Unix/macOS
+source venv/bin/activate
+
+# Install dependencies
+cd backend
+pip install -r requirements.txt
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your configuration
+
+# Run database migrations
+alembic upgrade head
+
+# Start the development server
+uvicorn app.main:app --reload
+```
+
+The API will be available at `http://localhost:8000`
+
+#### 3. Frontend Setup
+
+```bash
+# Navigate to frontend directory
+cd ../frontend
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your configuration
+
+# Start the development server
+npm run dev
+```
+
+The frontend will be available at `http://localhost:5173`
+
+### Running Tests
+
+#### Backend Tests
+```bash
+# Run all tests
+pytest
+
+# Run tests with coverage report
+pytest --cov=app tests/
+```
+
+#### Frontend Tests
+```bash
+# Run unit tests
+npm test
+
+# Run end-to-end tests
+npm run test:e2e
+```
 
 ### Prerequisites
 - Python 3.8+
@@ -153,7 +376,61 @@ The database is seeded using `seed.py` with real profile, skills, and project da
    npm run dev
    ```
 
-## Setup (Production)
+## ☁️ Production Deployment
+
+### Backend Deployment (Render)
+
+1. **Prerequisites**
+   - Render account
+   - GitHub repository connected to Render
+   - Environment variables configured
+
+2. **Deployment Steps**
+   - Push your code to the main branch
+   - Render will automatically detect the Python project
+   - Configure build and start commands:
+     ```
+     Build: pip install -r requirements.txt
+     Start: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+     ```
+   - Set environment variables in Render dashboard
+   - Deploy the service
+
+### Frontend Deployment (Netlify)
+
+1. **Prerequisites**
+   - Netlify account
+   - GitHub repository connected to Netlify
+
+2. **Deployment Steps**
+   - Connect your GitHub repository to Netlify
+   - Configure build settings:
+     - Build command: `npm run build`
+     - Publish directory: `dist`
+   - Set environment variables in Netlify UI
+   - Deploy the site
+
+### Environment Variables
+
+#### Backend (`.env`)
+```env
+# App
+ENVIRONMENT=production
+SECRET_KEY=your-secret-key
+CORS_ORIGINS=https://your-frontend-domain.com
+
+# Database
+DATABASE_URL=sqlite:///./app.db
+
+# Logging
+LOG_LEVEL=INFO
+```
+
+#### Frontend (`.env.production`)
+```env
+VITE_API_BASE_URL=https://your-api-domain.com
+VITE_ENV=production
+```
 
 ### Backend Deployment (Render)
 1. Push code to GitHub repository
