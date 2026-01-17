@@ -1,16 +1,69 @@
-# React + Vite
+# Me-API Playground - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the frontend for the Me-API Playground, built with React and Vite. It connects to a FastAPI backend to display profile information, projects, and search functionality.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- View profile information
+- Browse projects filtered by skills
+- Search across all content
+- Responsive design
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React 18
+- Vite
+- Fetch API for data fetching
+- Environment-based configuration
 
-## Expanding the ESLint configuration
+## Local Development
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Create a `.env` file based on `.env.example`
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+## Environment Variables
+
+Create a `.env` file in the root directory with the following variables:
+
+```
+VITE_API_BASE_URL=http://localhost:8000
+```
+
+For production, set `VITE_API_BASE_URL` to your production API URL.
+
+## Production Build
+
+To create a production build:
+
+```bash
+npm run build
+```
+
+The build artifacts will be stored in the `dist/` directory.
+
+## Deployment
+
+This project is configured for deployment on Netlify with the following settings:
+
+- **Build command:** `npm run build`
+- **Publish directory:** `dist`
+- **Environment variables:**
+  - `VITE_API_BASE_URL`: Your production API URL
+
+## API Endpoints
+
+- `GET /profile` - Get profile information
+- `GET /projects?skill={skill}` - Get projects filtered by skill
+- `GET /search?q={query}` - Search across all content
+
+## Live Demo
+
+[View Live Demo](https://me-api-playground.netlify.app)
