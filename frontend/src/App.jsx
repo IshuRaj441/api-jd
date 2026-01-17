@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+import { fetchProfile, fetchPythonProjects, search } from './utils/api';
 
 function App() {
   const [loading, setLoading] = useState({
@@ -24,9 +23,7 @@ function App() {
     const fetchProfile = async () => {
       try {
         setLoading(prev => ({ ...prev, profile: true }));
-        const response = await fetch(`${API_BASE}/profile`);
-        if (!response.ok) throw new Error('Failed to fetch profile');
-        const data = await response.json();
+        const data = await fetchProfile();
         setProfile(data);
         setError(prev => ({ ...prev, profile: null }));
       } catch (err) {
@@ -45,9 +42,7 @@ function App() {
     const fetchPythonProjects = async () => {
       try {
         setLoading(prev => ({ ...prev, pythonProjects: true }));
-        const response = await fetch(`${API_BASE}/projects?skill=python`);
-        if (!response.ok) throw new Error('Failed to fetch Python projects');
-        const data = await response.json();
+        const data = await fetchPythonProjects();
         setPythonProjects(data);
         setError(prev => ({ ...prev, pythonProjects: null }));
       } catch (err) {
@@ -68,9 +63,7 @@ function App() {
     
     try {
       setLoading(prev => ({ ...prev, search: true }));
-      const response = await fetch(`${API_BASE}/search?q=${encodeURIComponent(searchQuery)}`);
-      if (!response.ok) throw new Error('Search failed');
-      const data = await response.json();
+      const data = await search(searchQuery);
       setSearchResults(data);
       setError(prev => ({ ...prev, search: null }));
     } catch (err) {
@@ -86,9 +79,7 @@ function App() {
     const initialSearch = async () => {
       try {
         setLoading(prev => ({ ...prev, search: true }));
-        const response = await fetch(`${API_BASE}/search?q=test`);
-        if (!response.ok) throw new Error('Initial search failed');
-        const data = await response.json();
+        const data = await search('test');
         setSearchResults(data);
       } catch (err) {
         console.error('Initial search error:', err);
