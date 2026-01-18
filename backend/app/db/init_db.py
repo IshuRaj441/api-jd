@@ -39,15 +39,23 @@ def seed_db():
         )
         project2.skills = [python, javascript, react]
         
+        # Add Python API Playground project
+        python_project = Project(
+            title="Python API Playground",
+            description="A collection of Python projects and examples including FastAPI backends, data processing scripts, and API integrations. Demonstrates clean code, testing, and best practices.",
+            links="https://github.com/IshuRaj441/api-jd"
+        )
+        python_project.skills = [python, fastapi]
+        
         # Create profile
         profile = Profile(
             name="Ishu Raj",
-            email="ishu@email.com",
+            email="ishuraj176@gmail.com",
             education="B.Tech in Computer Science and Engineering"
         )
         
         # Add all to session and commit
-        db.add_all([python, fastapi, sqlalchemy, javascript, react, project1, project2, profile])
+        db.add_all([python, fastapi, sqlalchemy, javascript, react, project1, project2, python_project, profile])
         db.commit()
         print("Database seeded successfully")
         
