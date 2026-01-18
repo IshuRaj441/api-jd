@@ -25,14 +25,14 @@ export const apiFetch = async (endpoint, options = {}) => {
 
 // Helper functions for specific endpoints
 export const fetchProfile = async () => {
-  const data = await apiFetch('/api/v1/profile');
+  const data = await apiFetch('/profile');
   // Handle case where profile might be an array
   return Array.isArray(data) ? data[0] : data;
 };
 
 export const fetchPythonProjects = async () => {
   try {
-    const data = await apiFetch('/api/v1/projects?skill=python');
+    const data = await apiFetch('/projects?skill=python');
     return Array.isArray(data) ? data : [];
   } catch (error) {
     console.error('Error fetching Python projects:', error);
@@ -46,7 +46,7 @@ export const search = async (query) => {
       return [];
     }
     
-    const data = await apiFetch(`/api/v1/search?q=${encodeURIComponent(query.trim())}`);
+    const data = await apiFetch(`/search?q=${encodeURIComponent(query.trim())}`);
     
     // Handle different response formats
     const results = [];
