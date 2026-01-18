@@ -75,13 +75,20 @@ def seed_db():
             education="B.Tech in Computer Science and Engineering"
         )
         
-        # Add all projects to the profile
-        profile.projects = [python_project1, python_project2]
+        # Set profile for each project
+        for project in [project1, project2, python_project, python_project1, python_project2]:
+            project.profile = profile
         
         # Add all to session and commit
         db.add_all([
             python, fastapi, sqlalchemy, javascript, react, ml, docker, rag, streamlit,
-            project1, project2, python_project, python_project1, python_project2, profile
+            profile  # Add profile first to ensure it has an ID
+        ])
+        db.commit()
+        
+        # Now add projects with the profile relationship
+        db.add_all([
+            project1, project2, python_project, python_project1, python_project2
         ])
         db.commit()
         print("Database seeded successfully")

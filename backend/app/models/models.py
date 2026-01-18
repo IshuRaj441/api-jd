@@ -16,6 +16,10 @@ class Profile(Base):
     name = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False)
     education = Column(String)
+    projects = relationship("Project", back_populates="profile")
+    
+    def __repr__(self):
+        return f"<Profile(name='{self.name}', email='{self.email}')>"
 
 class Skill(Base):
     __tablename__ = "skills"
@@ -30,4 +34,9 @@ class Project(Base):
     title = Column(String, nullable=False)
     description = Column(String)
     links = Column(String)
+    profile_id = Column(Integer, ForeignKey('profiles.id'))
+    profile = relationship("Profile", back_populates="projects")
     skills = relationship("Skill", secondary=project_skills, backref="projects")
+    
+    def __repr__(self):
+        return f"<Project(title='{self.title}')>"
