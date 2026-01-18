@@ -78,7 +78,7 @@ async def favicon():
 # Health check endpoint
 @app.get("/")
 async def root():
-    return {"message": "Welcome to the Me-API Playground!"}
+    return {"message": "Hello, world!"}
 
 # Include API router
 app.include_router(api_router, prefix="")
