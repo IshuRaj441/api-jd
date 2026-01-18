@@ -26,10 +26,10 @@ PROFILE_DATA = {
     "title": "Full Stack Developer",
     "location": "India",
     "about": "Passionate developer building amazing things with code.",
-    "github_url": "https://github.com/ishuraj176",
+    "github_url": "https://github.com/IshuRaj441",
     "linkedin_url": "https://linkedin.com/in/ishuraj176",
     "twitter_url": "https://twitter.com/ishuraj176",
-    "profile_picture_url": "https://avatars.githubusercontent.com/u/your-github-id",
+    "profile_picture_url": "https://github.com/IshuRaj441.png",
     "created_at": "2024-01-19T00:00:00Z",
     "updated_at": "2024-01-19T00:00:00Z"
 }
