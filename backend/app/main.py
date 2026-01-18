@@ -65,7 +65,7 @@ def startup_event():
 # Favicon endpoint
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
-    return FileResponse("app/static/favicon.ico")
+    return FileResponse(os.path.join(os.path.dirname(__file__), "static", "favicon.ico"))
 
 # Health check endpoint
 @app.get("/")
