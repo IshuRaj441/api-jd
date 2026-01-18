@@ -8,6 +8,7 @@ def init_db():
 
 def seed_db():
     from sqlalchemy.orm import sessionmaker
+    from datetime import datetime
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     db = SessionLocal()
     
@@ -24,6 +25,10 @@ def seed_db():
         sqlalchemy = Skill(name="sqlalchemy")
         javascript = Skill(name="javascript")
         react = Skill(name="react")
+        ml = Skill(name="machine learning")
+        docker = Skill(name="docker")
+        rag = Skill(name="rag")
+        streamlit = Skill(name="streamlit")
         
         # Create projects
         project1 = Project(
@@ -48,6 +53,21 @@ def seed_db():
         )
         python_project.skills = [python, fastapi]
         
+        # Create Python projects
+        python_project1 = Project(
+            title="Python API Project",
+            description="A RESTful API built with FastAPI and SQLAlchemy",
+            links="https://github.com/ishuraj/python-api-project"
+        )
+        python_project1.skills = [python, fastapi, sqlalchemy]
+        
+        python_project2 = Project(
+            title="Machine Learning Model",
+            description="A machine learning model for image classification",
+            links="https://github.com/ishuraj/ml-project"
+        )
+        python_project2.skills = [python, ml]
+        
         # Create profile with updated information
         profile = Profile(
             name="Ishu Raj",
@@ -55,8 +75,14 @@ def seed_db():
             education="B.Tech in Computer Science and Engineering"
         )
         
+        # Add all projects to the profile
+        profile.projects = [python_project1, python_project2]
+        
         # Add all to session and commit
-        db.add_all([python, fastapi, sqlalchemy, javascript, react, project1, project2, python_project, profile])
+        db.add_all([
+            python, fastapi, sqlalchemy, javascript, react, ml, docker, rag, streamlit,
+            project1, project2, python_project, python_project1, python_project2, profile
+        ])
         db.commit()
         print("Database seeded successfully")
         

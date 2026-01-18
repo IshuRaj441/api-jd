@@ -33,7 +33,13 @@ export const fetchProfile = async () => {
 export const fetchPythonProjects = async () => {
   try {
     const data = await apiFetch('/projects?skill=python');
-    return Array.isArray(data) ? data : [];
+    // Handle both array and object with projects property
+    if (Array.isArray(data)) {
+      return data;
+    } else if (data && Array.isArray(data.projects)) {
+      return data.projects;
+    }
+    return [];
   } catch (error) {
     console.error('Error fetching Python projects:', error);
     throw error; // Re-throw to be handled by the component
