@@ -65,7 +65,11 @@ def startup_event():
 # Favicon endpoint
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
-    return FileResponse(os.path.join(os.path.dirname(__file__), "static", "favicon.ico"))
+    return FileResponse(
+        os.path.join(os.path.dirname(__file__), "static", "favicon.ico"),
+        media_type="image/x-icon",
+        headers={"Cache-Control": "public, max-age=86400"}
+    )
 
 # Health check endpoint
 @app.get("/")
