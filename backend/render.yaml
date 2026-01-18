@@ -7,8 +7,22 @@ services:
       python -c "from app.db.init_db import init_db; init_db()"
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
-      - key: DATABASE_URL
-        value: sqlite:///./app.db
+      - key: ENVIRONMENT
+        value: production
       - key: PYTHON_VERSION
         value: 3.9.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 30
+      - key: BACKEND_CORS_ORIGINS
+        value: "*"
+    plan: free
+
+databases:
+  - name: api-jd-db
+    databaseName: api_jd
+    user: api_jd_user
     plan: free
