@@ -2,7 +2,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.exc import SQLAlchemyError
 import os
-from pathlib import Path
 import logging
 from typing import Generator, Any
 
@@ -13,28 +12,18 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Create engine with configuration based on environment
-if settings.DATABASE_URL.startswith("sqlite"):
-    # For SQLite, ensure the directory exists
-    db_path = settings.DATABASE_URL.split("///")[-1]
-    db_dir = os.path.dirname(db_path)
-    if db_dir:
-        os.makedirs(db_dir, exist_ok=True)
-    
+connect_args = {}
+if settings.SQLALCHEMY_DATABASE_URI.startswith("sqlite"):
     # SQLite specific configuration
     connect_args = {"check_same_thread": False}
-    engine = create_engine(
-        settings.DATABASE_URL, 
-        connect_args=connect_args,
-        pool_pre_ping=True
-    )
-else:
-    # For PostgreSQL/other databases
-    engine = create_engine(
-        settings.DATABASE_URL,
-        pool_pre_ping=True,
-        pool_size=10,
-        max_overflow=20
-    )
+    
+engine = create_engine(
+    settings.SQLALCHEMY_DATABASE_URI,
+    connect_args=connect_args,
+    pool_pre_ping=True,
+    pool_size=10 if not settings.SQLALCHEMY_DATABASE_URI.startswith("sqlite") else 1,
+    max_overflow=20 if not settings.SQLALCHEMY_DATABASE_URI.startswith("sqlite") else 0
+)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base: Any = declarative_base()
