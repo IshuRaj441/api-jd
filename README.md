@@ -7,8 +7,8 @@ Me-API Playground is a full-stack application developed as part of the Track A a
 
 | Environment | URL | Status |
 |-------------|-----|--------|
-| Production API | [https://me-api-playground.onrender.com](https://me-api-playground.onrender.com) | [![API Status](https://img.shields.io/website?down_message=offline&label=status&up_message=online&url=https%3A%2F%2Fme-api-playground.onrender.com%2Fhealth)](https://me-api-playground.onrender.com/health) |
-| Frontend | [https://696bf889d67fda52b36ba795--superb-starship-a58eb9.netlify.app](https://696bf889d67fda52b36ba795--superb-starship-a58eb9.netlify.app) | [![Frontend Status](https://img.shields.io/website?down_message=offline&label=status&up_message=online&url=https%3A%2F%2F696bf889d67fda52b36ba795--superb-starship-a58eb9.netlify.app)](https://696bf889d67fda52b36ba795--superb-starship-a58eb9.netlify.app) |
+| Production API | [https://api-jd.onrender.com](https://api-jd.onrender.com) | [![API Status](https://img.shields.io/website?down_message=offline&label=status&up_message=online&url=https%3A%2F%2Fapi-jd.onrender.com%2Fhealth)](https://api-jd.onrender.com/health) |
+| Production Frontend | [https://api-jd.vercel.app](https://api-jd.vercel.app) | [![Frontend Status](https://img.shields.io/website?down_message=offline&label=status&up_message=online&url=https%3A%2F%2Fapi-jd.vercel.app)](https://api-jd.vercel.app) |
 
 ## 🏗️ System Architecture
 

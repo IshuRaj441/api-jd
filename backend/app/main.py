@@ -50,9 +50,10 @@ app.add_middleware(NoCacheMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://api-jd.onrender.com",
-        "https://api.jd.onrender.com",
-        "http://localhost:3000"
+        "https://api-jd.vercel.app",  # Vercel frontend
+        "https://api-jd.onrender.com",  # Render backend
+        "http://localhost:3000",  # Local development
+        "http://localhost:8000"   # Local backend
     ],
     allow_credentials=True,
     allow_methods=["*"],

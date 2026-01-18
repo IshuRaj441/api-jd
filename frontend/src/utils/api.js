@@ -1,4 +1,4 @@
-const API_BASE = 'https://me-api-playground.onrender.com';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api-jd.onrender.com';
 
 export const apiFetch = async (endpoint, options = {}) => {
   const defaultOptions = {
