@@ -1,14 +1,17 @@
 from sqlalchemy.orm import Session
 from app.db.database import engine, Base
-from app.models.models import Profile, Skill, Project
+from app.models.models import Skill, Project
 
 # Create database tables
 def init_db():
-    Base.metadata.create_all(bind=engine)
+    # Only create tables for skills and projects
+    Base.metadata.create_all(bind=engine, tables=[
+        Skill.__table__,
+        Project.__table__
+    ])
 
 def seed_db():
     from sqlalchemy.orm import sessionmaker
-    from datetime import datetime
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     db = SessionLocal()
     
@@ -16,7 +19,6 @@ def seed_db():
         # Clear existing data to ensure clean seed
         db.query(Project).delete()
         db.query(Skill).delete()
-        db.query(Profile).delete()
         db.commit()
             
         # Create skills (all lowercase for consistency)
@@ -68,30 +70,13 @@ def seed_db():
         )
         python_project2.skills = [python, ml]
         
-        # Create profile with updated information
-        profile = Profile(
-            name="Ishu Raj",
-            email="ishuraj176@gmail.com",
-            education="B.Tech in Computer Science and Engineering"
-        )
-        
-        # Set profile for each project
-        for project in [project1, project2, python_project, python_project1, python_project2]:
-            project.profile = profile
-        
         # Add all to session and commit
         db.add_all([
             python, fastapi, sqlalchemy, javascript, react, ml, docker, rag, streamlit,
-            profile  # Add profile first to ensure it has an ID
-        ])
-        db.commit()
-        
-        # Now add projects with the profile relationship
-        db.add_all([
             project1, project2, python_project, python_project1, python_project2
         ])
         db.commit()
-        print("Database seeded successfully")
+        print("Database seeded successfully with projects and skills")
         
     except Exception as e:
         print(f"Error seeding database: {e}")

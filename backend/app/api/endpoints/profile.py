@@ -1,43 +1,58 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from typing import List
-
-from app.db.database import get_db
-from app.models.models import Profile as DBProfile
-from app.schemas import Profile, ProfileCreate, ProfileUpdate
+from fastapi import APIRouter
+from typing import Dict, Any
+from pydantic import BaseModel
+from datetime import datetime
 
 router = APIRouter()
+
+class Profile(BaseModel):
+    name: str
+    email: str
+    title: str = "Full Stack Developer"
+    location: str = "India"
+    about: str = "Passionate developer building amazing things with code."
+    github_url: str = "https://github.com/ishuraj176"
+    linkedin_url: str = "https://linkedin.com/in/ishuraj176"
+    twitter_url: str = "https://twitter.com/ishuraj176"
+    profile_picture_url: str = "https://avatars.githubusercontent.com/u/your-github-id"
+    created_at: datetime = datetime.utcnow()
+    updated_at: datetime = datetime.utcnow()
+
+# Static profile data
+PROFILE_DATA = {
+    "name": "Ishu Raj",
+    "email": "ishuraj176@gmail.com",
+    "education": "B.Tech (IT)",
+    "title": "Full Stack Developer",
+    "location": "India",
+    "about": "Passionate developer building amazing things with code.",
+    "github_url": "https://github.com/ishuraj176",
+    "linkedin_url": "https://linkedin.com/in/ishuraj176",
+    "twitter_url": "https://twitter.com/ishuraj176",
+    "profile_picture_url": "https://avatars.githubusercontent.com/u/your-github-id",
+    "created_at": "2024-01-19T00:00:00Z",
+    "updated_at": "2024-01-19T00:00:00Z"
+}
 
 @router.get("/health")
 async def health_check():
     return {"status": "ok"}
 
-@router.post("/profile", response_model=Profile)
-def create_profile(profile: ProfileCreate, db: Session = Depends(get_db)):
-    db_profile = DBProfile(**profile.dict())
-    db.add(db_profile)
-    db.commit()
-    db.refresh(db_profile)
-    return db_profile
-
 @router.get("/profile", response_model=Profile)
-def read_profile(db: Session = Depends(get_db)):
-    profile = db.query(DBProfile).first()
-    if not profile:
-        raise HTTPException(status_code=404, detail="Profile not found")
-    return profile
+def read_profile():
+    """
+    Returns the static profile data.
+    This endpoint doesn't hit the database, ensuring consistent data across restarts.
+    """
+    return PROFILE_DATA
+
+# Keep these endpoints for backward compatibility but make them no-ops
+@router.post("/profile", response_model=Profile)
+def create_profile():
+    """No-op endpoint for backward compatibility"""
+    return PROFILE_DATA
 
 @router.put("/profile", response_model=Profile)
-def update_profile(profile_update: ProfileUpdate, db: Session = Depends(get_db)):
-    db_profile = db.query(DBProfile).first()
-    if not db_profile:
-        raise HTTPException(status_code=404, detail="Profile not found")
-    
-    update_data = profile_update.dict(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(db_profile, field, value)
-    
-    db.add(db_profile)
-    db.commit()
-    db.refresh(db_profile)
-    return db_profile
+def update_profile():
+    """No-op endpoint for backward compatibility"""
+    return PROFILE_DATA
