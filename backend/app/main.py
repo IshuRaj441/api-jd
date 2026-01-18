@@ -65,12 +65,7 @@ def startup_event():
 # Favicon endpoint
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
-    favicon_path = os.path.join(static_dir, "favicon.ico")
-    if not os.path.exists(favicon_path):
-        # Create an empty favicon if it doesn't exist
-        with open(favicon_path, "wb") as f:
-            f.write(b"")
-    return FileResponse(favicon_path)
+    return FileResponse("app/static/favicon.ico")
 
 # Health check endpoint
 @app.get("/")
