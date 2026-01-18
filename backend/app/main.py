@@ -1,6 +1,7 @@
 import os
 import time
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request, Response, HTTPException
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
@@ -17,7 +18,9 @@ app = FastAPI(
 )
 
 # Mount static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
+static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
+os.makedirs(static_dir, exist_ok=True)
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 class NoCacheMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
@@ -58,6 +61,16 @@ def startup_event():
     from app.db.init_db import seed_db
     init_db()
     seed_db()  # Ensure seed runs on startup
+
+# Favicon endpoint
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    favicon_path = os.path.join(static_dir, "favicon.ico")
+    if not os.path.exists(favicon_path):
+        # Create an empty favicon if it doesn't exist
+        with open(favicon_path, "wb") as f:
+            f.write(b"")
+    return FileResponse(favicon_path)
 
 # Health check endpoint
 @app.get("/")
