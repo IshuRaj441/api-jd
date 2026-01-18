@@ -6,15 +6,15 @@ from datetime import datetime
 router = APIRouter()
 
 class Profile(BaseModel):
-    name: str
-    email: str
+    name: str = "Ishu Raj"
+    email: str = "ishuraj176@gmail.com"
     title: str = "Full Stack Developer"
     location: str = "India"
     about: str = "Passionate developer building amazing things with code."
-    github_url: str = "https://github.com/ishuraj176"
+    github_url: str = "https://github.com/IshuRaj441"
     linkedin_url: str = "https://linkedin.com/in/ishuraj176"
     twitter_url: str = "https://twitter.com/ishuraj176"
-    profile_picture_url: str = "https://avatars.githubusercontent.com/u/your-github-id"
+    profile_picture_url: str = "https://github.com/IshuRaj441.png"
     created_at: datetime = datetime.utcnow()
     updated_at: datetime = datetime.utcnow()
 

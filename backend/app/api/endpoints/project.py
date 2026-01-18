@@ -14,20 +14,25 @@ def list_projects(
     skill: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
-    query = db.query(DBProject)
-    
-    if skill:
-        # Normalize the skill name (lowercase and trim)
-        skill = skill.strip().lower()
-        # Join with skills and filter case-insensitively
-        query = (
-            query.join(DBProject.skills)
-            .filter(func.lower(DBSkill.name) == skill)
-        )
-    
-    # Execute query and return results
-    projects = query.distinct().all()
-    return projects
+    try:
+        query = db.query(DBProject)
+        
+        if skill:
+            # Normalize the skill name (lowercase and trim)
+            skill = skill.strip().lower()
+            # Join with skills through the association table and filter case-insensitively
+            query = (
+                query.join(DBProject.skills_meta)
+                .join(DBSkill)
+                .filter(func.lower(DBSkill.name) == skill)
+            )
+        
+        # Execute query and return results
+        projects = query.distinct().all()
+        return projects
+    except Exception as e:
+        print(f"Error in list_projects: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/search")
 def search_projects(
