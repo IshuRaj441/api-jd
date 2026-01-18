@@ -3,3 +3,4 @@ uvicorn[standard]
 pydantic[email]>=2.7
 pydantic-settings
 email-validator
+sqlalchemy
