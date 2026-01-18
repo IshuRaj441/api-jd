@@ -1,9 +1,0 @@
-fastapi
-uvicorn[standard]
-pydantic>=2.7
-pydantic-settings
-sqlalchemy
-python-dotenv
-pytest
-pytest-cov
-httpx
