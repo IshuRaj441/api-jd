@@ -58,9 +58,9 @@ app.add_middleware(
 # Initialize database on startup
 @app.on_event("startup")
 def startup_event():
-    from app.db.init_db import seed_db
+    # Only initialize the database structure, don't seed data
+    # Seed data should be managed separately in production
     init_db()
-    seed_db()  # Ensure seed runs on startup
 
 # Favicon endpoint
 @app.get("/favicon.ico", include_in_schema=False)
