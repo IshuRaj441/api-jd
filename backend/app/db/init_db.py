@@ -12,10 +12,11 @@ def seed_db():
     db = SessionLocal()
     
     try:
-        # Check if database is already seeded
-        if db.query(Profile).first() is not None:
-            print("Database already seeded")
-            return
+        # Clear existing data to ensure clean seed
+        db.query(Project).delete()
+        db.query(Skill).delete()
+        db.query(Profile).delete()
+        db.commit()
             
         # Create skills (all lowercase for consistency)
         python = Skill(name="python")
@@ -47,7 +48,7 @@ def seed_db():
         )
         python_project.skills = [python, fastapi]
         
-        # Create profile
+        # Create profile with updated information
         profile = Profile(
             name="Ishu Raj",
             email="ishuraj176@gmail.com",
