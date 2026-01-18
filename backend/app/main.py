@@ -47,17 +47,22 @@ class NoCacheMiddleware(BaseHTTPMiddleware):
 app.add_middleware(NoCacheMiddleware)
 
 # Set up CORS
+origins = [
+    "https://api-jd.vercel.app",  # Production frontend
+    "https://api-jd-git-main-ishuraj441.vercel.app",  # Vercel preview
+    "http://localhost:3000",  # Local development
+    "http://localhost:5173"   # Vite default port
+]
+
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://api-jd.vercel.app",  # Vercel frontend
-        "https://api-jd.onrender.com",  # Render backend
-        "http://localhost:3000",  # Local development
-        "http://localhost:8000"   # Local backend
-    ],
+    allow_origins=origins,
+    allow_origin_regex=r"https://api-jd-.*\.vercel\.app$",  # Allow all Vercel preview URLs
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["Content-Disposition"]
 )
 
 # Initialize database on startup

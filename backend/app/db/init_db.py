@@ -1,26 +1,42 @@
-from sqlalchemy.orm import Session
-from app.db.database import engine, Base
-from app.models.models import Skill, Project
+import logging
+from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.exc import SQLAlchemyError
 
-# Create database tables
+from app.db.database import engine, Base, SessionLocal
+from app.models.models import Skill, Project, Profile
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 def init_db():
-    # Only create tables for skills and projects
-    Base.metadata.create_all(bind=engine, tables=[
-        Skill.__table__,
-        Project.__table__
-    ])
+    """Initialize the database by creating all tables."""
+    try:
+        # Import all models to ensure they are registered with SQLAlchemy
+        from app import models  # noqa: F401
+        
+        logger.info("Creating database tables...")
+        Base.metadata.create_all(bind=engine)
+        logger.info("Database tables created successfully")
+        
+    except Exception as e:
+        logger.error(f"Error initializing database: {e}")
+        raise
 
-def seed_db():
-    from sqlalchemy.orm import sessionmaker
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+def seed_initial_data():
+    """Seed the database with initial data."""
     db = SessionLocal()
     
     try:
-        # Clear existing data to ensure clean seed
-        db.query(Project).delete()
-        db.query(Skill).delete()
-        db.commit()
+        logger.info("Checking if database needs seeding...")
+        
+        # Check if we already have data
+        if db.query(Project).count() > 0 or db.query(Skill).count() > 0:
+            logger.info("Database already contains data, skipping seeding")
+            return
             
+        logger.info("Seeding database with initial data...")
+        
         # Create skills (all lowercase for consistency)
         python = Skill(name="python")
         fastapi = Skill(name="fastapi")
@@ -32,18 +48,27 @@ def seed_db():
         rag = Skill(name="rag")
         streamlit = Skill(name="streamlit")
         
+        # Create profile
+        profile = Profile(
+            name="Ishu Raj",
+            email="ishuraj@example.com",
+            education="Bachelor's in Computer Science"
+        )
+        
         # Create projects
         project1 = Project(
             title="Me-API Playground",
             description="Backend assessment project for showcasing skills and projects",
-            links="https://github.com/ishuraj/me-api"
+            links="https://github.com/ishuraj/me-api",
+            profile=profile
         )
         project1.skills = [python, fastapi, sqlalchemy]
         
         project2 = Project(
             title="E-commerce Platform",
             description="Full-stack e-commerce platform with React and FastAPI",
-            links="https://github.com/ishuraj/ecommerce"
+            links="https://github.com/ishuraj/ecommerce",
+            profile=profile
         )
         project2.skills = [python, javascript, react]
         
@@ -51,7 +76,8 @@ def seed_db():
         python_project = Project(
             title="Python API Playground",
             description="A collection of Python projects and examples including FastAPI backends, data processing scripts, and API integrations. Demonstrates clean code, testing, and best practices.",
-            links="https://github.com/IshuRaj441/api-jd"
+            links="https://github.com/IshuRaj441/api-jd",
+            profile=profile
         )
         python_project.skills = [python, fastapi]
         
@@ -70,10 +96,19 @@ def seed_db():
         )
         python_project2.skills = [python, ml]
         
+        # Add a test project with python skill
+        test_project = Project(
+            title="Python Test Project",
+            description="A test project to verify Python skill filtering",
+            links="https://github.com/ishuraj/python-test",
+            profile=profile
+        )
+        test_project.skills = [python]
+        
         # Add all to session and commit
         db.add_all([
             python, fastapi, sqlalchemy, javascript, react, ml, docker, rag, streamlit,
-            project1, project2, python_project, python_project1, python_project2
+            project1, project2, python_project, python_project1, python_project2, test_project
         ])
         db.commit()
         print("Database seeded successfully with projects and skills")

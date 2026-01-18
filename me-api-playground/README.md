@@ -1,46 +1,73 @@
 # 🚀 Me-API Playground
 
 ## 📌 Overview
-Me-API Playground is a full-stack application developed as part of the Track A assessment. This project showcases modern API design principles, efficient database modeling, and seamless deployment strategies. The application serves as a professional portfolio platform with a focus on clean architecture and maintainable code.
+Me-API Playground is a full-stack application that serves as a professional portfolio platform. It features a FastAPI backend with a React frontend, demonstrating modern API design, efficient database modeling, and clean architecture.
 
-## 🌐 Live Deployment
+## � Key Features
+- **Profile Management**: Showcase professional information and skills
+- **Project Showcase**: Display projects with skill-based filtering
+- **Health Check**: Monitor API status with `/health` endpoint
+- **Responsive Design**: Works on desktop and mobile devices
+
+## �🌐 Live Deployment
 
 | Environment | URL | Status |
 |-------------|-----|--------|
-| Production API | [https://me-api-playground.onrender.com](https://me-api-playground.onrender.com) | [![API Status](https://img.shields.io/website?down_message=offline&label=status&up_message=online&url=https%3A%2F%2Fme-api-playground.onrender.com%2Fhealth)](https://me-api-playground.onrender.com/health) |
-| Frontend | [https://696bf889d67fda52b36ba795--superb-starship-a58eb9.netlify.app](https://696bf889d67fda52b36ba795--superb-starship-a58eb9.netlify.app) | [![Frontend Status](https://img.shields.io/website?down_message=offline&label=status&up_message=online&url=https%3A%2F%2F696bf889d67fda52b36ba795--superb-starship-a58eb9.netlify.app)](https://696bf889d67fda52b36ba795--superb-starship-a58eb9.netlify.app) |
+| Production API | [https://api-jd.onrender.com](https://api-jd.onrender.com) | [![API Status](https://img.shields.io/website?down_message=offline&label=status&up_message=online&url=https%3A%2F%2Fapi-jd.onrender.com%2Fhealth)](https://api-jd.onrender.com/health) |
+| Frontend | [https://api-jd.vercel.app](https://api-jd.vercel.app) | [![Frontend Status](https://img.shields.io/website?down_message=offline&label=status&up_message=online&url=https%3A%2F%2Fapi-jd.vercel.app)](https://api-jd.vercel.app) |
 
 ## 🏗️ System Architecture
 
 ```mermaid
 graph TD
-    A[Frontend - React] -->|HTTPS| B[Backend - FastAPI]
+    A[React Frontend] -->|HTTPS| B[FastAPI Backend]
     B -->|SQL| C[(SQLite Database)]
-    B -->|Async Tasks| D[Background Workers]
     
     subgraph Frontend
-    A --> E[State Management]
-    A --> F[API Client]
+    A --> D[React Hooks]
+    A --> E[API Client]
+    A --> F[Responsive UI]
     end
     
     subgraph Backend
-    B --> G[Authentication]
-    B --> H[API Routes]
-    B --> I[Data Validation]
+    B --> G[API Endpoints]
+    B --> H[Data Validation]
+    B --> I[Database ORM]
     end
     
     subgraph Database
-    C --> J[Profiles]
-    C --> K[Projects]
-    C --> L[Skills]
+    C --> J[profiles]
+    C --> K[projects]
+    C --> L[skills]
+    C --> M[project_skills]
     end
 ```
 
 ### Key Components
-- **Frontend**: Modern React application with Vite
-- **Backend**: High-performance FastAPI server
+- **Frontend**: React 18 with Vite
+- **Backend**: FastAPI (Python 3.10+)
 - **Database**: SQLite with SQLAlchemy ORM
-- **CI/CD**: Automated testing and deployment
+- **API Documentation**: OpenAPI (Swagger UI)
+- **Hosting**: Vercel (Frontend), Render (Backend)
+
+## 🏗️ System Architecture
+
+### Frontend
+- **Framework**: React 18 + Vite
+- **State Management**: React Hooks
+- **Styling**: CSS Modules
+- **Build Tool**: Vite 4.x
+
+### Backend
+- **Framework**: FastAPI (Python 3.10+)
+- **Database**: SQLite (development), PostgreSQL (production)
+- **ORM**: SQLAlchemy
+- **API Documentation**: OpenAPI (Swagger UI)
+
+### Hosting
+- **Frontend**: Vercel
+- **Backend**: Render
+- **Database**: SQLite (development), PostgreSQL (production)
 
 ## 🛠️ Technology Stack
 
@@ -69,32 +96,93 @@ graph TD
 
 ### Base URL
 ```
-https://me-api-playground.onrender.com
+https://api-jd.onrender.com
 ```
 
-### Authentication
-*Note: Authentication is not implemented in the current version.*
+### Health Check
+```http
+GET /health
+```
+Response:
+```json
+{
+  "status": "ok"
+}
+```
 
-### Rate Limiting
-- Default: 100 requests per minute per IP address
+### List Projects
+```http
+GET /api/v1/projects
+```
+
+### Filter Projects by Skill
+```http
+GET /api/v1/projects?skill=python
+```
+
+### Get Profile
+```http
+GET /api/v1/profile
+```
 
 ### Profile
-- `GET /profile` - Get profile information
-- `POST /profile` - Create profile
-- `PUT /profile` - Update profile
+```http
+GET /profile
+```
+Returns the profile information including name, email, and education.
 
 ### Projects
-- `GET /projects` - List all projects
-- `GET /projects?skill={skill}` - Filter projects by skill
+```http
+GET /projects
+```
+List all projects.
 
-### Skills
-- `GET /skills/top` - Get top skills
+#### Filter by Skill
+```http
+GET /projects?skill=python
+```
+Filter projects by skill (case-insensitive).
 
 ### Search
-- `GET /search?q={query}` - Search across projects and skills
+```http
+GET /search?q=react
+```
+Search across projects and skills.
 
-### Health
-- `GET /health` - Health check endpoint
+### Example cURL
+```bash
+# Get profile
+curl https://api-jd.onrender.com/profile
+
+# Get projects with Python
+curl "https://api-jd.onrender.com/projects?skill=python"
+
+# Health check
+curl https://api-jd.onrender.com/health
+```
+
+## 🗃️ Database Schema
+
+### Profiles
+- `id` (Integer, Primary Key)
+- `name` (String)
+- `email` (String, Unique)
+- `education` (String)
+
+### Projects
+- `id` (Integer, Primary Key)
+- `title` (String)
+- `description` (String)
+- `links` (String, JSON)
+- `profile_id` (Integer, Foreign Key to profiles.id)
+
+### Skills
+- `id` (Integer, Primary Key)
+- `name` (String, Unique)
+
+### Project-Skills (Junction Table)
+- `project_id` (Integer, Foreign Key to projects.id)
+- `skill_id` (Integer, Foreign Key to skills.id)
 
 ## 🗃️ Database Schema
 

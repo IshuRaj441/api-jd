@@ -16,11 +16,17 @@ def list_projects(
     query = db.query(DBProject)
     
     if skill:
-        # Normalize skill name to lowercase for case-insensitive exact matching
-        normalized_skill = skill.lower().strip()
-        query = query.join(DBProject.skills).filter(DBSkill.name.ilike(normalized_skill))
+        # Normalize the skill name (lowercase and trim)
+        skill = skill.strip().lower()
+        # Join with skills and filter case-insensitively
+        query = (
+            query.join(DBProject.skills)
+            .filter(func.lower(DBSkill.name) == skill)
+        )
     
-    return query.all()
+    # Execute query and return results
+    projects = query.distinct().all()
+    return projects
 
 @router.get("/search")
 def search_projects(
