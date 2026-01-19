@@ -1,15 +1,12 @@
-import time
 import logging
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
-from typing import Dict, Any, Optional
-import os
+from typing import Dict, Any
 
 from app.core.config import settings
-from app.core.errors import register_exception_handlers, APIError
 from app.api.v1.api import api_router as v1_router
 
 # Configure logging
@@ -27,6 +24,7 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json" if settings.DEBUG else None,
     docs_url=settings.DOCS_URL if settings.DEBUG else None,
     redoc_url=None,
+    root_path=settings.ROOT_PATH if hasattr(settings, 'ROOT_PATH') else ""
 )
 
 # Security headers middleware
@@ -137,23 +135,13 @@ app = register_exception_handlers(app)
 @app.get("/")
 async def root() -> Dict[str, str]:
     return {
-        "name": settings.PROJECT_NAME,
+        "service": settings.PROJECT_NAME,
         "version": settings.VERSION,
-        "environment": settings.ENVIRONMENT,
-        "docs": "/docs" if settings.DEBUG else None
+        "docs": "/docs" if settings.DEBUG else None,
+        "api_v1": f"{settings.API_V1_STR}/docs" if settings.DEBUG else None
     }
 
-# Health check endpoint (versioned)
-@app.get(f"{settings.API_V1_STR}/health")
-async def health_check() -> Dict[str, Any]:
-    return {
-        "status": "ok",
-        "version": settings.VERSION,
-        "environment": settings.ENVIRONMENT,
-        "timestamp": time.time()
-    }
-
-# Include API routers
+# Include API routers with versioned prefix
 app.include_router(v1_router, prefix=settings.API_V1_STR)
 
 # Debug endpoint to list all routes (only in development)
@@ -170,73 +158,3 @@ if settings.DEBUG:
             if hasattr(route, "path")
         ]
         return {"routes": url_list}
-        # Log the exception
-        logger.error(
-            "Request failed",
-            exc_info=True,
-            extra={
-                "error": str(e),
-                "traceback": str(e.__traceback__)
-            }
-        )
-        
-        # Return a 500 error
-        return JSONResponse(
-            status_code=500,
-            content={
-                "success": False,
-                "message": "Internal server error",
-                "error_code": "internal_server_error"
-            }
-        )
-
-# Health check endpoint
-@app.get("/")
-async def root():
-    return {
-        "message": "Welcome to the API JD Backend",
-        "documentation": "/api/docs",
-        "version": "1.0.0"
-    }
-
-@app.get("/api")
-async def api_root():
-    return {
-        "message": "Welcome to the API",
-        "endpoints": {
-            "v1": "/api/v1",
-            "docs": "/api/docs",
-            "health": "/api/health"
-        }
-    }
-
-@app.get("/api/v1")
-async def v1_root():
-    return {
-        "message": "Welcome to API v1",
-        "endpoints": {
-            "profile": "/api/v1/profile",
-            "projects": "/api/v1/projects",
-            "health": "/api/v1/health"
-        }
-    }
-
-@app.get("/favicon.ico", include_in_schema=False)
-async def favicon():
-    return Response(status_code=204)
-
-# Debug endpoint to list all routes
-@app.get("/api/debug/routes")
-async def list_routes():
-    """List all available API routes"""
-    routes = []
-    for route in app.routes:
-        if hasattr(route, "path"):
-            routes.append({
-                "path": route.path,
-                "name": route.name,
-                "methods": getattr(route, "methods", None)
-            })
-    return {"routes": routes}
-
-# API routes are already included with proper prefixes above
