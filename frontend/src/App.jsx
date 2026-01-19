@@ -4,7 +4,7 @@ import { fetchProfile, fetchPythonProjects, search } from './utils/api';
 
 // Default profile data
 const DEFAULT_PROFILE = {
-  name: 'Ishu Raj',
+  name: 'Ishu raj',
   email: 'ishuraj176@gmail.com',
   title: 'Full Stack Developer',
   location: 'India',
