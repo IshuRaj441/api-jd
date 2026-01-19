@@ -1,9 +1,11 @@
 // API Configuration
-const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'https://api-jd.onrender.com') + '/api/v1';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api-jd.onrender.com';
 
 // Helper function to create full URL with query parameters
 const createUrl = (endpoint, params = {}) => {
-  const url = new URL(`${API_BASE}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`);
+  // Ensure endpoint starts with a slash
+  const fullEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const url = new URL(`${API_BASE}${fullEndpoint}`);
   
   // Add query parameters if provided
   if (params) {
@@ -107,20 +109,19 @@ export const apiFetch = async (endpoint, options = {}) => {
 
 // Helper functions for specific endpoints
 export const fetchProfile = async () => {
-  try {
-    const data = await apiFetch('/profile');
-    // Handle case where profile might be an array
-    return Array.isArray(data) ? data[0] : data;
-  } catch (error) {
-    console.error('Failed to fetch profile:', error);
-    // Return a default profile if the API fails
-    return {
-      name: 'John Doe',
-      title: 'Full Stack Developer',
-      bio: 'Experienced developer with a passion for building web applications.',
-      skills: ['JavaScript', 'Python', 'React', 'Node.js']
-    };
+  const response = await fetch(createUrl('/api/profile'), {
+    method: 'GET',
+    headers: defaultHeaders,
+    credentials: 'include',
+    cache: 'no-store'
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
   }
+
+  return response.json();
 };
 
 /**
@@ -130,18 +131,23 @@ export const fetchProfile = async () => {
  */
 export const fetchProjects = async (skill = null) => {
   const params = {};
-  if (skill) {
-    params.skill = skill.toLowerCase();
-  }
+  if (skill) params.skill = skill;
   
-  try {
-    const data = await apiFetch('/projects', { params });
-    return Array.isArray(data) ? data : [];
-  } catch (error) {
-    console.error('Failed to fetch projects:', error);
-    // Return empty array instead of throwing to prevent UI breakage
-    return [];
+  const url = createUrl('/api/projects', params);
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: defaultHeaders,
+    credentials: 'include',
+    cache: 'no-store'
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
   }
+
+  const data = await response.json();
+  return Array.isArray(data) ? data : [];
 };
 
 // Alias for backward compatibility

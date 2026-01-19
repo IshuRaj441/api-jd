@@ -89,5 +89,5 @@ async def favicon():
 async def root():
     return {"message": "Hello, world!"}
 
-# Include API router
-app.include_router(api_router, prefix="")
+# Include API router with /api prefix
+app.include_router(api_router, prefix="/api")
