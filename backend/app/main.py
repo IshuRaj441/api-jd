@@ -51,14 +51,15 @@ origins = [
     "https://api-jd.vercel.app",  # Production frontend
     "https://api-jd-git-main-ishuraj441.vercel.app",  # Vercel preview
     "http://localhost:3000",  # Local development
-    "http://localhost:5173"   # Vite default port
+    "http://localhost:5173",  # Vite default port
+    "https://api-jd.vercel.app"  # Explicitly added for the production deployment
 ]
 
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_origin_regex=r"https://api-jd-.*\.vercel\.app$",  # Allow all Vercel preview URLs
+    allow_origin_regex=r"https://api-jd(-[a-zA-Z0-9-]+)?\.vercel\.app$",  # Allow all Vercel preview URLs
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
