@@ -7,7 +7,7 @@ router = APIRouter()
 
 class Profile(BaseModel):
     name: str = "Ishu Raj"
-    email: str = "ishuraj176@gmail.com"
+    email: str = "ishuraj1756@gmail.com"
     title: str = "Full Stack Developer"
     location: str = "India"
     about: str = "Passionate developer building amazing things with code."
@@ -21,7 +21,7 @@ class Profile(BaseModel):
 # Static profile data
 PROFILE_DATA = {
     "name": "Ishu Raj",
-    "email": "ishuraj176@gmail.com",
+    "email": "ishuraj1756@gmail.com",
     "education": "B.Tech (IT)",
     "title": "Full Stack Developer",
     "location": "India",
