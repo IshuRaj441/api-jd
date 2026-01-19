@@ -1,11 +1,11 @@
 // API Configuration
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api-jd.onrender.com';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api-jd.onrender.com/api/v1';
 
 // Helper function to create full URL with query parameters
 const createUrl = (endpoint, params = {}) => {
-  // Ensure endpoint starts with a slash
-  const fullEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-  const url = new URL(`${API_BASE}${fullEndpoint}`);
+  // Ensure endpoint doesn't have a leading slash to prevent double slashes
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
+  const url = new URL(`${API_BASE}/${cleanEndpoint}`);
   
   // Add query parameters if provided
   if (params) {
