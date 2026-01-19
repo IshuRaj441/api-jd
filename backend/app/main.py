@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, status
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.api import api_router
 
@@ -22,6 +23,11 @@ app.add_middleware(
 @app.get("/")
 def root():
     return {"message": "API JD backend running"}
+
+# Health check redirect
+@app.get("/health", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+async def health_redirect():
+    return RedirectResponse(url="/api/v1/health/")
 
 # Include API router with versioned prefix
 app.include_router(api_router, prefix="/api/v1")
