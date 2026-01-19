@@ -12,6 +12,13 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from app.db.base_class import Base
 from app.core.config import settings
 
+# Import all models to ensure they are loaded and registered with Base.metadata
+# This is necessary for autogenerate to work properly
+from app.db.models import profile  # noqa: F401
+
+# Import other models as needed
+# from app.db.models import other_model  # noqa: F401
+
 # This is the Alembic Config object
 config = context.config
 

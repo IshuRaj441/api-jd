@@ -1,47 +1,40 @@
 import time
 import logging
-from fastapi import FastAPI, Request
-from fastapi.middleware import Middleware
-from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi.middleware.gzip import GZipMiddleware
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
-from typing import Any, Dict, List, Optional
+from typing import Dict, Any, Optional
+import os
+
+from app.core.config import settings
+from app.core.errors import register_exception_handlers, APIError
+from app.api.v1.api import api_router as v1_router
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=settings.LOG_LEVEL,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
 logger = logging.getLogger(__name__)
 
-# Initialize FastAPI app
-app = FastAPI()
+# Initialize FastAPI app with metadata
+app = FastAPI(
+    title=settings.PROJECT_NAME,
+    description="API for Job Description Management System",
+    version=settings.VERSION,
+    openapi_url=f"{settings.API_V1_STR}/openapi.json" if settings.DEBUG else None,
+    docs_url=settings.DOCS_URL if settings.DEBUG else None,
+    redoc_url=None,
+)
 
-# Simple test endpoint
-@app.get("/")
-async def read_root():
-    return {"message": "Welcome to the API JD Backend"}
-
-# Health check endpoint
-@app.get("/health")
-async def health_check():
-    return {"status": "ok"}
-
-# Health check endpoint
-@app.get("/api/health")
-async def health_check():
-    return {"status": "ok", "version": "1.0.0"}
-
-# Health check endpoint is now properly namespaced under /api/health
-
-# NoCacheMiddleware
-class NoCacheMiddleware(BaseHTTPMiddleware):
+# Security headers middleware
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Call the next middleware/route handler
         response = await call_next(request)
         
-        # Add security headers
-        response.headers.update({
+        security_headers = {
             "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0, no-transform",
             "Pragma": "no-cache",
             "Expires": "0",
@@ -49,65 +42,134 @@ class NoCacheMiddleware(BaseHTTPMiddleware):
             "X-Frame-Options": "DENY",
             "X-XSS-Protection": "1; mode=block",
             "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-            "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: https://fastapi.tiangolo.com; font-src 'self' data: https://cdn.jsdelivr.net; connect-src 'self' https://cdn.jsdelivr.net;"
-        })
+            "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:;"
+        }
         
+        # Add security headers to response
+        for header, value in security_headers.items():
+            response.headers[header] = value
+            
         # Ensure Vary headers are set to prevent caching variations
         if "Vary" not in response.headers:
             response.headers["Vary"] = "Accept-Encoding"
             
-        response.headers["ETag"] = 'W/"{}"'.format(int(time.time()))
-        
         return response
 
-# Add NoCacheMiddleware
-app.add_middleware(NoCacheMiddleware)
-
-# Logging middleware
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    # Skip logging for health checks
-    if request.url.path in ["/api/health", "/api/v1/health"]:
-        return await call_next(request)
+# Request logging middleware
+class LoggingMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        # Skip logging for health checks
+        if request.url.path in [f"{settings.API_V1_STR}/health"]:
+            return await call_next(request)
+            
+        start_time = time.time()
         
-    start_time = time.time()
-    
-    # Log request
-    logger.info(
-        "Request started",
-        extra={
-            "request": {
-                "method": request.method,
-                "url": str(request.url),
-                "headers": dict(request.headers),
-                "query_params": dict(request.query_params),
-                "client": f"{request.client.host}:{request.client.port}"
-            }
-        }
-    )
-    
-    try:
-        response = await call_next(request)
-        
-        # Calculate process time
-        process_time = (time.time() - start_time) * 1000
-        
-        # Log response
+        # Log request
         logger.info(
-            "Request completed",
+            "Request started",
             extra={
-                "status_code": response.status_code,
-                "process_time_ms": round(process_time, 2),
-                "response_headers": dict(response.headers)
+                "request": {
+                    "method": request.method,
+                    "path": request.url.path,
+                    "query_params": dict(request.query_params),
+                    "client": f"{request.client.host}" if request.client else "unknown"
+                }
             }
         )
         
-        # Add response time header
-        response.headers["X-Process-Time"] = f"{process_time:.2f}ms"
-        
-        return response
-        
-    except Exception as e:
+        try:
+            response = await call_next(request)
+            process_time = (time.time() - start_time) * 1000
+            
+            # Log response
+            logger.info(
+                "Request completed",
+                extra={
+                    "method": request.method,
+                    "path": request.url.path,
+                    "status_code": response.status_code,
+                    "process_time_ms": round(process_time, 2),
+                }
+            )
+            
+            return response
+            
+        except Exception as e:
+            process_time = (time.time() - start_time) * 1000
+            logger.error(
+                "Request failed",
+                exc_info=True,
+                extra={
+                    "method": request.method,
+                    "path": request.url.path,
+                    "process_time_ms": round(process_time, 2),
+                }
+            )
+            raise
+
+# Add middleware
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(LoggingMiddleware)
+
+# Add CORS middleware
+if settings.BACKEND_CORS_ORIGINS:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+# Add GZip middleware for compressing responses
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+# Add trusted hosts middleware
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=settings.ALLOWED_HOSTS,
+)
+
+# Register exception handlers
+app = register_exception_handlers(app)
+
+# Root endpoint
+@app.get("/")
+async def root() -> Dict[str, str]:
+    return {
+        "name": settings.PROJECT_NAME,
+        "version": settings.VERSION,
+        "environment": settings.ENVIRONMENT,
+        "docs": "/docs" if settings.DEBUG else None
+    }
+
+# Health check endpoint (versioned)
+@app.get(f"{settings.API_V1_STR}/health")
+async def health_check() -> Dict[str, Any]:
+    return {
+        "status": "ok",
+        "version": settings.VERSION,
+        "environment": settings.ENVIRONMENT,
+        "timestamp": time.time()
+    }
+
+# Include API routers
+app.include_router(v1_router, prefix=settings.API_V1_STR)
+
+# Debug endpoint to list all routes (only in development)
+if settings.DEBUG:
+    @app.get("/debug/routes")
+    async def list_routes() -> Dict[str, Any]:
+        url_list = [
+            {
+                "path": route.path, 
+                "name": route.name,
+                "methods": list(route.methods)
+            }
+            for route in app.routes
+            if hasattr(route, "path")
+        ]
+        return {"routes": url_list}
         # Log the exception
         logger.error(
             "Request failed",
