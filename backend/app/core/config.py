@@ -52,6 +52,10 @@ class Settings(BaseSettings):
     CACHE_TTL: int = int(os.getenv("CACHE_TTL", "300"))  # 5 minutes
     
     def __init__(self, **values):
+        # Initialize SQLALCHEMY_DATABASE_URI from DATABASE_URL if not provided
+        if 'SQLALCHEMY_DATABASE_URI' not in values and 'DATABASE_URL' in values:
+            values['SQLALCHEMY_DATABASE_URI'] = values['DATABASE_URL']
+            
         super().__init__(**values)
         
         # Handle database URL for production
@@ -63,7 +67,7 @@ class Settings(BaseSettings):
                 self.SQLALCHEMY_DATABASE_URI = db_url
         
         # Ensure SQLite database directory exists
-        if self.SQLALCHEMY_DATABASE_URI.startswith("sqlite"):
+        if hasattr(self, 'SQLALCHEMY_DATABASE_URI') and self.SQLALCHEMY_DATABASE_URI.startswith("sqlite"):
             db_path = self.SQLALCHEMY_DATABASE_URI.split("///")[-1]
             db_dir = os.path.dirname(db_path)
             if db_dir:
@@ -71,7 +75,7 @@ class Settings(BaseSettings):
     
     @property
     def DATABASE_URL(self) -> str:
-        return self.SQLALCHEMY_DATABASE_URI
+        return getattr(self, 'SQLALCHEMY_DATABASE_URI', '')
 
     class Config:
         case_sensitive = True

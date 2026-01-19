@@ -38,3 +38,8 @@ class Profile(ProfileBase):
                 ]
             }
         }
+
+class ProfileResponse(BaseModel):
+    success: bool
+    message: str
+    data: Optional[Profile] = None

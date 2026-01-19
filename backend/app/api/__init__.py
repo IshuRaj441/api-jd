@@ -1,19 +1,19 @@
 from fastapi import APIRouter
-from .endpoints import project, profile
-from .health import router as health_router
+from .routes import health, projects
+from .endpoints import profile as profile_endpoint
 
 # Create main API router
 api_router = APIRouter()
 
-# Include health check endpoint
-api_router.include_router(health_router, tags=["health"])
+# Include all routes
+api_router.include_router(health.router, prefix="/health", tags=["Health"])
+api_router.include_router(projects.router, prefix="/projects", tags=["Projects"])
 
 # Include API v1 endpoints
-v1_router = APIRouter(prefix="/api/v1")
+v1_router = APIRouter(prefix="/v1")
 
-# Include project and profile endpoints
-v1_router.include_router(project.router, tags=["projects"])
-v1_router.include_router(profile.router, tags=["profile"])
+# Include profile endpoint without additional prefix (it already has /profile prefix)
+v1_router.include_router(profile_endpoint.router, tags=["Profile"])
 
 # Mount v1 router with prefix
 api_router.include_router(v1_router, prefix="")
