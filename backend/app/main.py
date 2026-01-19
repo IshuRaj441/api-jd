@@ -47,12 +47,12 @@ class NoCacheMiddleware(BaseHTTPMiddleware):
 app.add_middleware(NoCacheMiddleware)
 
 # Set up CORS
-# Allow all origins in development, restrict in production
 origins = [
     "https://api-jd.vercel.app",
     "https://api-jd-*.vercel.app",  # All Vercel preview deployments
     "http://localhost:3000",
     "http://localhost:5173",
+    "http://127.0.0.1:3000",
     "https://api-qzv8nceuf-ishuraj441s-projects.vercel.app"
 ]
 
@@ -62,9 +62,9 @@ app.add_middleware(
     allow_origins=origins,
     allow_origin_regex=r"https://api-jd-.*\.vercel\.app$",  # Allow all Vercel previews
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all methods
-    allow_headers=["*"],  # Allow all headers
-    expose_headers=["*"],  # Expose all headers
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_headers=["*"],
+    expose_headers=["Content-Disposition"],
     max_age=600,  # Cache preflight requests for 10 minutes
 )
 

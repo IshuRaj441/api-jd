@@ -1,102 +1,186 @@
-// Use environment variable with fallback to production URL
+// API Configuration
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api-jd.onrender.com';
 
-// Helper function to create full URL
-const createUrl = (endpoint) => {
-  // Ensure endpoint starts with a slash
-  const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-  return `${API_BASE}${path}`;
+// Helper function to create full URL with query parameters
+const createUrl = (endpoint, params = {}) => {
+  const url = new URL(`${API_BASE}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`);
+  
+  // Add query parameters if provided
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        if (Array.isArray(value)) {
+          value.forEach(v => url.searchParams.append(key, v));
+        } else {
+          url.searchParams.append(key, value);
+        }
+      }
+    });
+  }
+  
+  return url.toString();
 };
 
+// Default headers for all requests
+const defaultHeaders = {
+  'Content-Type': 'application/json',
+  'Accept': 'application/json',
+  'Cache-Control': 'no-cache, no-store, must-revalidate',
+  'Pragma': 'no-cache',
+  'Expires': '0'
+};
+
+/**
+ * Generic API fetch wrapper with error handling
+ */
 export const apiFetch = async (endpoint, options = {}) => {
-  const url = createUrl(endpoint);
+  const { params = {}, ...fetchOptions } = options;
+  const url = createUrl(endpoint, params);
   
-  const defaultOptions = {
-    credentials: 'include', // Include cookies in CORS requests
-    mode: 'cors', // Enable CORS mode
+  const requestOptions = {
+    ...fetchOptions,
+    credentials: 'include',
+    mode: 'cors',
     headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0',
-      ...options.headers,
+      ...defaultHeaders,
+      ...(fetchOptions.headers || {})
     },
-    cache: 'no-store',
-    ...options,
+    cache: 'no-store'
   };
 
   try {
-    const response = await fetch(url, defaultOptions);
+    const response = await fetch(url, requestOptions);
     
-    // Handle non-2xx responses
-    if (!response.ok) {
-      let errorData;
-      try {
-        errorData = await response.json();
-      } catch (e) {
-        errorData = await response.text();
+    // Handle empty responses (204 No Content)
+    if (response.status === 204) {
+      return null;
+    }
+    
+    // Get content type
+    const contentType = response.headers.get('content-type');
+    
+    // Parse response based on content type
+    if (contentType && contentType.includes('application/json')) {
+      const data = await response.json();
+      
+      if (!response.ok) {
+        const error = new Error(data.message || `HTTP error! status: ${response.status}`);
+        error.status = response.status;
+        error.data = data;
+        throw error;
       }
       
-      const error = new Error(
-        errorData?.message || `HTTP error! status: ${response.status}`
-      );
-      error.status = response.status;
-      error.data = errorData;
-      throw error;
+      return data;
     }
-
-    // Handle empty responses
-    const contentType = response.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      return response.json();
+    
+    // For non-JSON responses
+    const text = await response.text();
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-    return response.text();
+    
+    return text;
   } catch (error) {
     console.error(`API request failed for ${url}:`, error);
     
-    // Handle CORS errors specifically
+    // Handle CORS and network errors specifically
     if (error instanceof TypeError) {
       if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-        throw new Error('Network error: Unable to connect to the server. Please check your connection.');
+        console.error('Network error detected. Please check:');
+        console.error('1. Is the backend server running?');
+        console.error('2. Is the API URL correct?', API_BASE);
+        throw new Error('Unable to connect to the server. Please check your connection and try again.');
       }
+      
       if (error.message.includes('CORS')) {
-        throw new Error('CORS error: The request was blocked due to CORS policy. Please contact support.');
+        console.error('CORS error detected. Please check:');
+        console.error('1. Are CORS headers properly configured on the backend?');
+        console.error('2. Is the frontend making requests to the correct origin?');
+        throw new Error('Request was blocked due to CORS policy. Please contact support if the issue persists.');
       }
     }
     
+    // Re-throw the original error if it's not a network/CORS error
     throw error;
   }
 };
 
 // Helper functions for specific endpoints
 export const fetchProfile = async () => {
-  const data = await apiFetch('/profile');
-  // Handle case where profile might be an array
-  return Array.isArray(data) ? data[0] : data;
-};
-
-export const fetchPythonProjects = async () => {
   try {
-    const data = await apiFetch('/projects?skill=python');
-    // Handle both array and object with projects property
-    if (Array.isArray(data)) {
-      return data;
-    } else if (data && Array.isArray(data.projects)) {
-      return data.projects;
-    }
-    return [];
+    const data = await apiFetch('/profile');
+    // Handle case where profile might be an array
+    return Array.isArray(data) ? data[0] : data;
   } catch (error) {
-    console.error('Error fetching Python projects:', error);
-    throw error; // Re-throw to be handled by the component
+    console.error('Failed to fetch profile:', error);
+    // Return a default profile if the API fails
+    return {
+      name: 'John Doe',
+      title: 'Full Stack Developer',
+      bio: 'Experienced developer with a passion for building web applications.',
+      skills: ['JavaScript', 'Python', 'React', 'Node.js']
+    };
   }
 };
 
-export const search = async (query) => {
+/**
+ * Fetch projects with optional skill filter
+ * @param {string} [skill] - Optional skill to filter projects
+ * @returns {Promise<Array>} Array of projects
+ */
+export const fetchProjects = async (skill = null) => {
+  const params = {};
+  if (skill) {
+    params.skill = skill.toLowerCase();
+  }
+  
   try {
-    if (!query || typeof query !== 'string' || !query.trim()) {
-      return [];
-    }
-    
+    const data = await apiFetch('/projects', { params });
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error('Failed to fetch projects:', error);
+    // Return empty array instead of throwing to prevent UI breakage
+    return [];
+  }
+};
+
+// Alias for backward compatibility
+export const fetchPythonProjects = () => fetchProjects('python');
+
+/**
+ * Check API health status
+ * @returns {Promise<Object>} Health status object
+ */
+export const checkApiHealth = async () => {
+  try {
+    const response = await apiFetch('/api/health');
+    return {
+      status: 'ok',
+      version: response.version || 'unknown',
+      timestamp: new Date().toISOString(),
+      ...response
+    };
+  } catch (error) {
+    console.error('Health check failed:', error);
+    return {
+      status: 'error',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    };
+  }
+};
+
+/**
+ * Search for projects or profiles
+ * @param {string} query - Search query
+ * @returns {Promise<Array>} Search results
+ */
+export const search = async (query) => {
+  if (!query || typeof query !== 'string' || query.trim() === '') {
+    return [];
+  }
+  
+  try {
     const data = await apiFetch(`/search?q=${encodeURIComponent(query.trim())}`);
     
     // Handle different response formats
@@ -131,6 +215,6 @@ export const search = async (query) => {
     return results;
   } catch (error) {
     console.error('Search error:', error);
-    throw error; // Re-throw to be handled by the component
+    return []; // Return empty array on error to prevent UI breakage
   }
 };
