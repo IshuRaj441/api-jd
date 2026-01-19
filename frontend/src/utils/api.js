@@ -1,8 +1,21 @@
+// Use environment variable with fallback to production URL
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api-jd.onrender.com';
 
+// Helper function to create full URL
+const createUrl = (endpoint) => {
+  // Ensure endpoint starts with a slash
+  const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  return `${API_BASE}${path}`;
+};
+
 export const apiFetch = async (endpoint, options = {}) => {
+  const url = createUrl(endpoint);
+  
   const defaultOptions = {
+    credentials: 'include', // Include cookies in CORS requests
+    mode: 'cors', // Enable CORS mode
     headers: {
+      'Content-Type': 'application/json',
       'Cache-Control': 'no-cache, no-store, must-revalidate',
       'Pragma': 'no-cache',
       'Expires': '0',
@@ -12,15 +25,47 @@ export const apiFetch = async (endpoint, options = {}) => {
     ...options,
   };
 
-  const response = await fetch(`${API_BASE}${endpoint}`, defaultOptions);
-  
-  if (!response.ok) {
-    const error = new Error(`HTTP error! status: ${response.status}`);
-    error.status = response.status;
+  try {
+    const response = await fetch(url, defaultOptions);
+    
+    // Handle non-2xx responses
+    if (!response.ok) {
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch (e) {
+        errorData = await response.text();
+      }
+      
+      const error = new Error(
+        errorData?.message || `HTTP error! status: ${response.status}`
+      );
+      error.status = response.status;
+      error.data = errorData;
+      throw error;
+    }
+
+    // Handle empty responses
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return response.json();
+    }
+    return response.text();
+  } catch (error) {
+    console.error(`API request failed for ${url}:`, error);
+    
+    // Handle CORS errors specifically
+    if (error instanceof TypeError) {
+      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        throw new Error('Network error: Unable to connect to the server. Please check your connection.');
+      }
+      if (error.message.includes('CORS')) {
+        throw new Error('CORS error: The request was blocked due to CORS policy. Please contact support.');
+      }
+    }
+    
     throw error;
   }
-
-  return response.json();
 };
 
 // Helper functions for specific endpoints

@@ -20,7 +20,7 @@ class Profile(BaseModel):
 
 # Static profile data
 PROFILE_DATA = {
-    "name": "Ishu raj",
+    "name": "Ishu Raj",
     "email": "ishuraj176@gmail.com",
     "education": "B.Tech (IT)",
     "title": "Full Stack Developer",
