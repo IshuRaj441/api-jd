@@ -1,27 +1,43 @@
 import os
 import time
 from fastapi import FastAPI, Request, Response, HTTPException
-from fastapi.responses import FileResponse
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
-
 from app.core.config import settings
-from app.api import api_router
-from app.db.database import init_db
+from app.api.routes import profile, projects, health, index
 
-# Create FastAPI app
+# Initialize FastAPI app
 app = FastAPI(
-    title=settings.PROJECT_NAME,
-    version=settings.VERSION,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json"
+    title="API JD Backend",
+    description="A production-ready FastAPI backend",
+    version="1.0.0"
+)
+
+# CORS Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, replace with specific origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Mount static files
-static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
-os.makedirs(static_dir, exist_ok=True)
-app.mount("/static", StaticFiles(directory=static_dir), name="static")
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
+# Include API routes
+app.include_router(index.router, tags=["Index"])
+app.include_router(profile.router, prefix="/api/profile", tags=["Profile"])
+app.include_router(projects.router, prefix="/api/projects", tags=["Projects"])
+app.include_router(health.router, prefix="/api/health", tags=["Health"])
+
+# Health check endpoint
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
+
+# NoCacheMiddleware
 class NoCacheMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         # Call the next middleware/route handler

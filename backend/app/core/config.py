@@ -1,29 +1,55 @@
 from pydantic_settings import BaseSettings
-from pathlib import Path
+from typing import List
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 class Settings(BaseSettings):
     # Project settings
-    PROJECT_NAME: str = "Me-API Playground"
+    PROJECT_NAME: str = "API JD Backend"
     VERSION: str = "1.0.0"
-    API_V1_STR: str = "/api/v1"
+    DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
     ENVIRONMENT: str = "development"
     TESTING: bool = False
     
+    # API
+    API_V1_STR: str = "/api/v1"
+    API_PREFIX: str = "/api"
+    DOCS_URL: str = "/docs"
+    OPENAPI_URL: str = "/openapi.json"
+    
     # Database configuration
-    SQLALCHEMY_DATABASE_URI: str = "sqlite:///./app.db"
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./app.db")
+    TEST_DATABASE_URL: str = os.getenv("TEST_DATABASE_URL", "sqlite:///./test.db")
     
     # Security
-    SECRET_KEY: str = "your-secret-key-here"
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "your-secret-key-here")
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
     
     # CORS
-    BACKEND_CORS_ORIGINS: list = [
+    BACKEND_CORS_ORIGINS: List[str] = [
         "http://localhost:3000",
         "http://localhost:5173",
-        "https://api-jd.vercel.app"
+        "http://localhost:8000",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:8000",
+        "https://api-jd.vercel.app",
+        "https://api-jd-*.vercel.app"
     ]
+    
+    # Rate Limiting
+    RATE_LIMIT: int = int(os.getenv("RATE_LIMIT", "100"))
+    RATE_LIMIT_WINDOW: int = int(os.getenv("RATE_LIMIT_WINDOW", "900"))  # 15 minutes
+    
+    # Logging
+    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
+    LOG_FORMAT: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    
+    # Caching
+    CACHE_TTL: int = int(os.getenv("CACHE_TTL", "300"))  # 5 minutes
     
     def __init__(self, **values):
         super().__init__(**values)
