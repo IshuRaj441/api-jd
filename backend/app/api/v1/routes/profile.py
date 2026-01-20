@@ -8,7 +8,7 @@ async def get_profile():
     return {
         "name": "Ishu Raj",
         "email": "ishuraj441@gmail.com",
-        "education": "B.Tech (Cse), Chandigarh University — 2023–2027",
+        "education": "B.Tech (CSE), Chandigarh University — 2023–2027",
         "title": "Full Stack Developer",
         "location": "India",
         "about": "Passionate developer building amazing things with code.",
