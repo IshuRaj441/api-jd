@@ -22,19 +22,27 @@ async def get_projects(
         projects = [
             {
                 "id": 1,
-                "title": "Project 1",
-                "description": "A sample project",
-                "skills": ["python", "fastapi"],
-                "github_url": "https://github.com/example/project1",
-                "demo_url": "https://example.com/project1"
+                "title": "E-Commerce API",
+                "description": "A RESTful API for an e-commerce platform built with FastAPI and PostgreSQL",
+                "skills": ["python", "fastapi", "postgresql", "sqlalchemy", "pydantic"],
+                "github_url": "https://github.com/example/ecommerce-api",
+                "demo_url": "https://api.example.com/ecommerce"
             },
             {
                 "id": 2,
-                "title": "Project 2",
-                "description": "Another sample project",
-                "skills": ["react", "typescript"],
-                "github_url": "https://github.com/example/project2",
-                "demo_url": "https://example.com/project2"
+                "title": "Portfolio Website",
+                "description": "A responsive portfolio website built with React and TypeScript",
+                "skills": ["react", "typescript", "tailwindcss"],
+                "github_url": "https://github.com/example/portfolio",
+                "demo_url": "https://example.com"
+            },
+            {
+                "id": 3,
+                "title": "Data Analysis Tool",
+                "description": "A Python tool for analyzing and visualizing data using pandas and matplotlib",
+                "skills": ["python", "pandas", "matplotlib", "numpy", "jupyter"],
+                "github_url": "https://github.com/example/data-analysis",
+                "demo_url": "https://example.com/data-analysis"
             }
         ]
         

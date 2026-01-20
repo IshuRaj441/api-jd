@@ -1,10 +1,15 @@
-// Get base URL from environment variable or use default
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://api-jd-1-9vjq.onrender.com";
+// frontend/src/config/api.js
 
-// Ensure the base URL ends with a slash
-const normalizedBase = BASE_URL.endsWith('/') ? BASE_URL : `${BASE_URL}/`;
+// 1️⃣ Resolve base URL (env → fallback)
+const RAW_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:8000";
 
-// Export the full API base URL with version
-const API_BASE = `${normalizedBase}api/v1`;
+// 2️⃣ Normalize trailing slash
+const NORMALIZED_BASE_URL = RAW_BASE_URL.endsWith("/")
+  ? RAW_BASE_URL
+  : `${RAW_BASE_URL}/`;
 
-export default API_BASE;
+// 3️⃣ Append API version (single source of truth)
+export const API_BASE = `${NORMALIZED_BASE_URL}api/v1/`;

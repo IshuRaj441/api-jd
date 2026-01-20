@@ -3,7 +3,9 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.db.database import engine, Base, SessionLocal
-from app.models.models import Skill, Project, Profile
+from app.models.skill import Skill
+from app.models.project import Project
+from app.models.profile import Profile
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -51,8 +53,17 @@ def seed_initial_data():
         # Create profile
         profile = Profile(
             name="Ishu Raj",
-            email="ishuraj@example.com",
-            education="Bachelor's in Computer Science"
+            email="ishuraj176@gmail.com",
+            education="Bachelor's in Computer Science",
+            headline="Full Stack Developer",
+            location="India",
+            bio="Passionate developer building amazing things with code.",
+            links={
+                'github': 'https://github.com/IshuRaj441',
+                'linkedin': '',
+                'portfolio': '',
+                'twitter': ''
+            }
         )
         
         # Create projects
@@ -119,7 +130,11 @@ def seed_initial_data():
     finally:
         db.close()
 
+def seed_db():
+    """Wrapper function to initialize and seed the database."""
+    init_db()
+    seed_initial_data()
+
 # Initialize the database
 if __name__ == "__main__":
-    init_db()
     seed_db()

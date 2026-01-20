@@ -1,5 +1,5 @@
 // API Configuration
-import { API_BASE } from '@/config/api';
+import API_BASE from '@/config/api';
 
 /**
  * Helper function to create a properly formatted URL with query parameters
