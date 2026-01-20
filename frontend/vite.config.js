@@ -33,9 +33,13 @@ export default defineConfig(({ mode }) => {
       // Ensure environment variables are properly embedded in the build
       rollupOptions: {
         output: {
-          manualChunks: {
-            react: ['react', 'react-dom', 'react-router-dom'],
-            vendor: ['axios', 'date-fns']
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+                return 'react';
+              }
+              return 'vendor';
+            }
           }
         }
       }
