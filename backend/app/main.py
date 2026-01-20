@@ -28,15 +28,32 @@ async def legacy_profile():
     Maintained for backward compatibility with existing frontend clients.
     """
     try:
-        # Call the v1 profile endpoint function directly
-        return await v1_get_profile()
+        # Import the router to call the v1 profile endpoint
+        from fastapi import Request
+        from fastapi.responses import JSONResponse
+        from fastapi import status
+        
+        # Create a mock request to pass to the v1 endpoint
+        request = Request(scope={
+            'type': 'http',
+            'method': 'GET',
+            'path': '/api/v1/profile',
+            'headers': []
+        })
+        
+        # Call the v1 profile endpoint through the router
+        response = await api_router.routes[0].endpoint(request)
+        return response
     except Exception as e:
         logger.error(f"Error in legacy profile endpoint: {str(e)}")
-        return {
-            "status": "error",
-            "message": "Failed to fetch profile",
-            "details": str(e)
-        }
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={
+                "status": "error",
+                "message": "Failed to fetch profile",
+                "details": str(e)
+            }
+        )
 
 # Mount static files
 static_dir = os.path.join(Path(__file__).parent.parent, "static")
