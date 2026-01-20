@@ -1,7 +1,10 @@
-from app.db.database import SessionLocal
-from app.models.models import Profile
+from app.db.database import SessionLocal, engine
+from app.models.models import Profile, Base
 
 def update_profile():
+    # Create tables if they don't exist
+    Base.metadata.create_all(bind=engine)
+    
     db = SessionLocal()
     try:
         # Get the first profile (there should only be one)
@@ -10,19 +13,21 @@ def update_profile():
         if profile:
             # Update the profile
             profile.name = "Ishu Raj"
-            profile.email = "ishuraj176@gmail.com"
+            profile.email = "ishuraj441@gmail.com"
+            profile.education = "B.Tech (Cse), Chandigarh University — 2023–2027"
             db.commit()
             print("Profile updated successfully")
         else:
             # If no profile exists, create one
             profile = Profile(
                 name="Ishu Raj",
-                email="ishuraj176@gmail.com",
-                education="B.Tech in Computer Science and Engineering"
+                email="ishuraj441@gmail.com",
+                education="B.Tech (Cse), Chandigarh University — 2023–2027"
             )
             db.add(profile)
             db.commit()
             print("New profile created successfully")
+            
     except Exception as e:
         print(f"Error updating profile: {e}")
         db.rollback()
