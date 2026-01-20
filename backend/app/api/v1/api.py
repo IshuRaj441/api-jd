@@ -6,5 +6,6 @@ from .routes.projects import router as projects_router
 api_router = APIRouter()
 
 api_router.include_router(health_router, prefix="/health")
-api_router.include_router(profile_router, prefix="/profile")
+# Mount profile router at root path
+api_router.include_router(profile_router, prefix="")
 api_router.include_router(projects_router, prefix="/projects")
