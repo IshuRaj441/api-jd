@@ -1,11 +1,18 @@
 // API Configuration
 import { API_BASE } from '@/config/api';
 
-// Helper function to create full URL with query parameters
+/**
+ * Helper function to create a properly formatted URL with query parameters
+ * @param {string} endpoint - The API endpoint (e.g., '/profile', 'projects')
+ * @param {Object} [params={}] - Optional query parameters
+ * @returns {string} Fully formatted URL
+ */
 const createUrl = (endpoint, params = {}) => {
-  // Ensure endpoint doesn't have a leading slash to prevent double slashes
+  // Remove leading slash from endpoint if present
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
-  const url = new URL(`${API_BASE}/${cleanEndpoint}`);
+  
+  // Create URL object with the base URL
+  const url = new URL(cleanEndpoint, API_BASE);
   
   // Add query parameters if provided
   if (params) {
@@ -33,21 +40,23 @@ const defaultHeaders = {
 };
 
 /**
- * Generic API fetch wrapper with error handling
+ * Generic API fetch wrapper with error handling and automatic retry
+ * @param {string} endpoint - The API endpoint
+ * @param {Object} [options={}] - Fetch options
+ * @param {Object} [options.params={}] - Query parameters
+ * @param {number} [retries=2] - Number of retry attempts
+ * @returns {Promise<*>} The API response data
  */
-export const apiFetch = async (endpoint, options = {}) => {
-  const { params = {}, ...fetchOptions } = options;
+const apiFetch = async (endpoint, { params = {}, retries = 2, ...fetchOptions } = {}) => {
   const url = createUrl(endpoint, params);
   
   const requestOptions = {
-    ...fetchOptions,
-    credentials: 'same-origin',
-    mode: 'cors',
+    method: 'GET',
     headers: {
       ...defaultHeaders,
       ...(fetchOptions.headers || {})
     },
-    cache: 'no-store'
+    ...fetchOptions
   };
 
   try {
@@ -58,62 +67,45 @@ export const apiFetch = async (endpoint, options = {}) => {
       return null;
     }
     
-    // Get content type
-    const contentType = response.headers.get('content-type');
+    const data = await response.json().catch(() => ({}));
     
-    // Parse response based on content type
-    if (contentType && contentType.includes('application/json')) {
-      const data = await response.json();
-      
-      if (!response.ok) {
-        const error = new Error(data.message || `HTTP error! status: ${response.status}`);
-        error.status = response.status;
-        error.data = data;
-        throw error;
-      }
-      
-      return data;
+    // Handle rate limiting (429) with retry
+    if (response.status === 429 && retries > 0) {
+      const retryAfter = response.headers.get('Retry-After') || 1;
+      await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
+      return apiFetch(endpoint, { params, retries: retries - 1, ...fetchOptions });
     }
     
-    // For non-JSON responses
-    const text = await response.text();
+    // Check for error responses
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const error = new Error(data.detail || response.statusText || 'Request failed');
+      error.status = response.status;
+      error.data = data;
+      throw error;
     }
     
-    return text;
+    return data;
   } catch (error) {
-    console.error(`API request failed for ${url}:`, error);
-    
-    // Handle CORS and network errors specifically
-    if (error instanceof TypeError) {
-      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-        console.error('Network error detected. Please check:');
-        console.error('1. Is the backend server running?');
-        console.error('2. Is the API URL correct?', API_BASE);
-        throw new Error('Unable to connect to the server. Please check your connection and try again.');
-      }
-      
-      if (error.message.includes('CORS')) {
-        console.error('CORS error detected. Please check:');
-        console.error('1. Are CORS headers properly configured on the backend?');
-        console.error('2. Is the frontend making requests to the correct origin?');
-        throw new Error('Request was blocked due to CORS policy. Please contact support if the issue persists.');
-      }
-    }
-    
-    // Re-throw the original error if it's not a network/CORS error
+    console.error(`API request to ${endpoint} failed:`, error);
     throw error;
   }
 };
 
-// Helper functions for specific endpoints
+/**
+ * Fetches the user's profile
+ * @returns {Promise<Object>} User profile data
+ */
 export const fetchProfile = async () => {
   return apiFetch('/profile');
 };
 
 /**
  * Fetch projects with optional skill filter
+ * @param {string} [skill] - Optional skill to filter projects
+ * @returns {Promise<Array>} Array of projects
+ */
+/**
+ * Fetches projects with optional skill filter
  * @param {string} [skill] - Optional skill to filter projects
  * @returns {Promise<Array>} Array of projects
  */
@@ -125,12 +117,15 @@ export const fetchProjects = async (skill = null) => {
   return Array.isArray(data) ? data : [];
 };
 
-// Alias for backward compatibility
+/**
+ * Fetches Python projects (alias for fetchProjects with 'python' filter)
+ * @returns {Promise<Array>} Array of Python projects
+ */
 export const fetchPythonProjects = () => fetchProjects('python');
 
 /**
- * Check API health status
- * @returns {Promise<Object>} Health status object
+ * Checks the health status of the API
+ * @returns {Promise<Object>} Health status information
  */
 export const checkApiHealth = async () => {
   try {
@@ -146,13 +141,14 @@ export const checkApiHealth = async () => {
     return {
       status: 'error',
       error: error.message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      statusCode: error.status
     };
   }
 };
 
 /**
- * Search for projects or profiles
+ * Searches for projects and profiles
  * @param {string} query - Search query
  * @returns {Promise<Array>} Search results
  */
@@ -162,7 +158,12 @@ export const search = async (query) => {
   }
   
   try {
-    const data = await apiFetch(`/search`, { params: { q: query.trim() } });
+    const data = await apiFetch('/search', { 
+      params: { 
+        q: query.trim(),
+        limit: 50 // Limit results to prevent performance issues
+      } 
+    });
     
     // Handle different response formats
     const results = [];
@@ -172,30 +173,45 @@ export const search = async (query) => {
       return data.map(item => ({
         ...item,
         type: 'Project',
-        name: item.title || item.name || 'Untitled Project'
+        name: item.title || item.name || 'Untitled Project',
+        _score: item._score || 1.0
       }));
     }
     
-    // Handle object with projects and skills
-    if (data.projects && Array.isArray(data.projects)) {
+    // Handle case where data is an object with projects and/or profiles
+    if (data.projects) {
       results.push(...data.projects.map(project => ({
         ...project,
         type: 'Project',
-        name: project.title || project.name || 'Untitled Project'
+        name: project.title || project.name || 'Untitled Project',
+        _score: project._score || 1.0
       })));
     }
     
-    if (data.skills && Array.isArray(data.skills)) {
-      results.push(...data.skills.map(skill => ({
-        ...skill,
-        type: 'Skill',
-        name: skill.name || 'Unnamed Skill'
+    if (data.profiles) {
+      results.push(...data.profiles.map(profile => ({
+        ...profile,
+        type: 'Profile',
+        name: profile.name || 'Unnamed Profile',
+        _score: profile._score || 1.0
       })));
     }
     
-    return results;
+    // If no results but we have a direct response, use that
+    if (results.length === 0 && data && typeof data === 'object') {
+      results.push({
+        ...data,
+        type: data.type || 'Result',
+        name: data.title || data.name || 'Untitled',
+        _score: data._score || 1.0
+      });
+    }
+    
+    // Sort by score if available
+    return results.sort((a, b) => (b._score || 0) - (a._score || 0));
   } catch (error) {
     console.error('Search error:', error);
-    return []; // Return empty array on error to prevent UI breakage
+    // Return empty array on error to prevent UI breakage
+    return []; 
   }
 };
