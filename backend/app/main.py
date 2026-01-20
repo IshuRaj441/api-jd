@@ -1,8 +1,9 @@
-from fastapi import FastAPI, status, Request, Response
+from fastapi import FastAPI, status, Request, Response, Depends, HTTPException
 from fastapi.responses import JSONResponse, FileResponse
 import logging
 import time
-from typing import Callable
+from typing import Callable, Dict, Any
+from sqlalchemy.orm import Session
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -12,10 +13,30 @@ from fastapi.staticfiles import StaticFiles
 import os
 from pathlib import Path
 
-# Import the v1 API router
+# Import the v1 API router and profile function
 from app.api.v1.api import api_router
+from app.api.v1.routes.profile import get_profile as v1_get_profile
+from app.db.session import get_db
 
 app = FastAPI(title="API JD")
+
+# Legacy profile endpoint for backward compatibility - must be defined before other routes
+@app.get("/profile")
+async def legacy_profile():
+    """
+    Legacy profile endpoint that proxies to the new /api/v1/profile endpoint.
+    Maintained for backward compatibility with existing frontend clients.
+    """
+    try:
+        # Call the v1 profile endpoint function directly
+        return await v1_get_profile()
+    except Exception as e:
+        logger.error(f"Error in legacy profile endpoint: {str(e)}")
+        return {
+            "status": "error",
+            "message": "Failed to fetch profile",
+            "details": str(e)
+        }
 
 # Mount static files
 static_dir = os.path.join(Path(__file__).parent.parent, "static")
@@ -106,6 +127,7 @@ async def log_routes():
 
 # Include the v1 API router with the /api/v1 prefix
 app.include_router(api_router, prefix="/api/v1")
+
 
 # Add a simple route to list all available API endpoints
 @app.get("/api")
