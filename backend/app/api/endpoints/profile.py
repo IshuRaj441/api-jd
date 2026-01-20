@@ -21,8 +21,8 @@ class ProfileResponse(BaseModel):
 # Static profile data
 PROFILE_DATA = {
     "name": "Ishu Raj",
-    "email": "ishuraj176@gmail.com",
-    "education": "B.Tech (IT)",
+    "email": "ishuraj441@gmail.com",
+    "education": "B.Tech (Cse), Chandigarh University — 2023–2027",
     "title": "Full Stack Developer",
     "location": "India",
     "about": "Passionate developer building amazing things with code.",
@@ -31,7 +31,7 @@ PROFILE_DATA = {
     "twitter_url": "https://twitter.com/ishuraj176",
     "profile_picture_url": "https://github.com/IshuRaj441.png",
     "created_at": "2024-01-19T00:00:00Z",
-    "updated_at": "2024-01-19T00:00:00Z"
+    "updated_at": "2024-01-20T00:00:00Z"
 }
 
 @router.get("/health")
