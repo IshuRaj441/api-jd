@@ -1,5 +1,5 @@
 // API Configuration
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'https://api-jd.onrender.com/api/v1';
+import { API_BASE } from '@/config/api';
 
 // Helper function to create full URL with query parameters
 const createUrl = (endpoint, params = {}) => {
@@ -41,7 +41,7 @@ export const apiFetch = async (endpoint, options = {}) => {
   
   const requestOptions = {
     ...fetchOptions,
-    credentials: 'include',
+    credentials: 'same-origin',
     mode: 'cors',
     headers: {
       ...defaultHeaders,
@@ -109,19 +109,7 @@ export const apiFetch = async (endpoint, options = {}) => {
 
 // Helper functions for specific endpoints
 export const fetchProfile = async () => {
-  const response = await fetch(createUrl('/api/profile'), {
-    method: 'GET',
-    headers: defaultHeaders,
-    credentials: 'include',
-    cache: 'no-store'
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
-  }
-
-  return response.json();
+  return apiFetch('/profile');
 };
 
 /**
@@ -133,20 +121,7 @@ export const fetchProjects = async (skill = null) => {
   const params = {};
   if (skill) params.skill = skill;
   
-  const url = createUrl('/api/projects', params);
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: defaultHeaders,
-    credentials: 'include',
-    cache: 'no-store'
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
-  }
-
-  const data = await response.json();
+  const data = await apiFetch('/projects', { params });
   return Array.isArray(data) ? data : [];
 };
 
@@ -159,7 +134,7 @@ export const fetchPythonProjects = () => fetchProjects('python');
  */
 export const checkApiHealth = async () => {
   try {
-    const response = await apiFetch('/api/health');
+    const response = await apiFetch('/health');
     return {
       status: 'ok',
       version: response.version || 'unknown',
@@ -187,7 +162,7 @@ export const search = async (query) => {
   }
   
   try {
-    const data = await apiFetch(`/search?q=${encodeURIComponent(query.trim())}`);
+    const data = await apiFetch(`/search`, { params: { q: query.trim() } });
     
     // Handle different response formats
     const results = [];

@@ -2,19 +2,15 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import { fetchProfile, fetchPythonProjects, search } from './utils/api';
 
-// Default profile data
-const DEFAULT_PROFILE = {
-  name: 'Ishu raj',
-  email: 'ishuraj176@gmail.com',
-  title: 'Full Stack Developer',
-  location: 'India',
-  about: 'Passionate developer building amazing things with code.',
-  avatar: 'https://github.com/IshuRaj441.png',
-  socials: {
-    github: 'https://github.com/IshuRaj441',
-    linkedin: 'https://linkedin.com/in/ishuraj176',
-    twitter: 'https://twitter.com/ishuraj176'
-  }
+// Initial empty profile state
+const INITIAL_PROFILE = {
+  name: '',
+  email: '',
+  title: '',
+  location: '',
+  about: '',
+  avatar: '',
+  socials: {}
 };
 
 // Loading spinner component
@@ -47,7 +43,7 @@ function App() {
     search: null
   });
   
-  const [profile, setProfile] = useState(DEFAULT_PROFILE);
+  const [profile, setProfile] = useState(INITIAL_PROFILE);
   const [pythonProjects, setPythonProjects] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -58,14 +54,11 @@ function App() {
       try {
         setLoading(prev => ({ ...prev, profile: true }));
         const data = await fetchProfile();
-        // Merge API data with default profile, with API data taking precedence
-        setProfile({ ...DEFAULT_PROFILE, ...data });
+        setProfile(data);
         setError(prev => ({ ...prev, profile: null }));
       } catch (err) {
         console.error('Profile fetch error:', err);
-        // If API fails, use default profile
-        setProfile(DEFAULT_PROFILE);
-        setError(prev => ({ ...prev, profile: 'Using default profile data.' }));
+        setError(prev => ({ ...prev, profile: 'Failed to load profile. Please refresh the page to try again.' }));
       } finally {
         setLoading(prev => ({ ...prev, profile: false }));
       }
@@ -84,7 +77,7 @@ function App() {
         setError(prev => ({ ...prev, pythonProjects: null }));
       } catch (err) {
         console.error('Python projects fetch error:', err);
-        setError(prev => ({ ...prev, pythonProjects: 'Failed to load projects. Please try again later.' }));
+        setError(prev => ({ ...prev, pythonProjects: 'Failed to load projects. Please refresh the page to try again.' }));
       } finally {
         setLoading(prev => ({ ...prev, pythonProjects: false }));
       }
