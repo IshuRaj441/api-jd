@@ -72,14 +72,52 @@ graph TD
 
 ### Base URL
 ```
-https://api-jd.onrender.com/
+https://api-jd.onrender.com/api/v1
 ```
+
+### Available Endpoints
+
+#### Health Check
+- `GET /health`
+  - Check API status
+  - No authentication required
+  - Example response:
+    ```json
+    {
+        "status": "ok",
+        "service": "API JD",
+        "timestamp": "2024-01-21T01:07:00Z"
+    }
+    ```
+
+#### Profile
+- `GET /profile`
+  - Get user profile information
+  - Returns: Profile details including name, email, social links, etc.
+
+#### Projects
+- `GET /projects`
+  - List all projects with optional filtering
+  - Query Parameters:
+    - `skip`: Number of projects to skip (pagination)
+    - `limit`: Maximum number of projects to return (max 100)
+    - `status`: Filter by project status
+    - `skill`: Filter by skill name (case-insensitive)
+
+- `GET /projects/{project_id}`
+  - Get project details by ID
+  - Path Parameters:
+    - `project_id`: The ID of the project to retrieve
 
 ### Authentication
 *Note: Authentication is not implemented in the current version.*
 
 ### Rate Limiting
 - Default: 100 requests per minute per IP address
+
+### Interactive API Documentation
+- Swagger UI: [/docs](https://api-jd.onrender.com/docs)
+- ReDoc: [/redoc](https://api-jd.onrender.com/redoc)
 
 
 

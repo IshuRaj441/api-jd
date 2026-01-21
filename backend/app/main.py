@@ -51,26 +51,24 @@ app.add_middleware(
 @app.get("/profile")
 async def legacy_profile():
     """
-    Legacy profile endpoint that proxies to the new /api/v1/profile endpoint.
+    Legacy profile endpoint that returns the same data as the v1 profile endpoint.
     Maintained for backward compatibility with existing frontend clients.
     """
     try:
-        # Import the router to call the v1 profile endpoint
-        from fastapi import Request
-        from fastapi.responses import JSONResponse
-        from fastapi import status
-        
-        # Create a mock request to pass to the v1 endpoint
-        request = Request(scope={
-            'type': 'http',
-            'method': 'GET',
-            'path': '/api/v1/profile',
-            'headers': []
-        })
-        
-        # Call the v1 profile endpoint through the router
-        response = await api_router.routes[0].endpoint(request)
-        return response
+        # Directly return the profile data instead of trying to call the endpoint
+        return {
+            "id": 1,
+            "name": "Ishu Raj",
+            "email": "ishuraj176@gmail.com",
+            "title": "Full Stack Developer",
+            "location": "India",
+            "about": "Passionate developer building amazing things with code.",
+            "github_url": "https://github.com/IshuRaj441",
+            "linkedin_url": "https://www.linkedin.com/in/ishu-raj-13b840291/",
+            "portfolio_url": "https://api-jd-ishuraj441.vercel.app/",
+            "created_at": "2024-01-21T00:00:00",
+            "updated_at": "2024-01-21T00:00:00"
+        }
     except Exception as e:
         logger.error(f"Error in legacy profile endpoint: {str(e)}")
         return JSONResponse(

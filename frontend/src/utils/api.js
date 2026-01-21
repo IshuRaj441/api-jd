@@ -1,9 +1,12 @@
 // API Configuration
 import { API_BASE } from '@/config/api';
 
-// Base API path
-const API_BASE_URL = API_BASE.endsWith('/') ? API_BASE : `${API_BASE}/`;
+// Base API path - ensure no trailing slash
+const API_BASE_URL = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE;
 const API_VERSION = 'api/v1';
+
+// Debug
+console.log('API Configuration:', { API_BASE_URL, API_VERSION });
 
 /**
  * Helper function to create a properly formatted URL with query parameters
@@ -26,7 +29,15 @@ const createUrl = (endpoint, params = {}) => {
   ].filter(Boolean);
   
   // Create the URL with the proper path
-  const url = new URL(pathSegments.join('/'), baseUrl.origin);
+  const path = '/' + pathSegments.join('/');
+  const url = new URL(path, baseUrl.origin);
+  
+  // Debug log the final URL
+  console.log('API Request:', { 
+    baseUrl: baseUrl.toString(), 
+    endpoint,
+    finalUrl: url.toString() 
+  });
   
   // Add query parameters if provided
   if (params && typeof params === 'object') {
@@ -70,31 +81,51 @@ const apiFetch = async (endpoint, params = {}, { retries = 2, ...fetchOptions } 
       ...defaultHeaders,
       ...(fetchOptions.headers || {})
     },
-    ...fetchOptions
+    ...fetchOptions,
+    credentials: 'include' // Include credentials (cookies) in the request
   };
+
+  console.log(`API Request [${requestOptions.method}]:`, url);
+  console.log('Request Options:', { headers: requestOptions.headers });
 
   try {
     const response = await fetch(url, requestOptions);
+    
+    console.log(`API Response [${response.status} ${response.statusText}]:`, url);
     
     // Handle empty responses (204 No Content)
     if (response.status === 204) {
       return null;
     }
     
-    const data = await response.json().catch(() => ({}));
+    // Try to parse response as JSON, fall back to text if not JSON
+    let data;
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      data = await response.json().catch(() => ({}));
+    } else {
+      const text = await response.text();
+      console.warn('Non-JSON response:', text);
+      data = { message: text };
+    }
+    
+    // Log the response data for debugging
+    console.log('Response data:', data);
     
     // Handle rate limiting (429) with retry
     if (response.status === 429 && retries > 0) {
       const retryAfter = response.headers.get('Retry-After') || 1;
+      console.log(`Rate limited. Retrying after ${retryAfter} seconds...`);
       await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
-      return apiFetch(endpoint, { params, retries: retries - 1, ...fetchOptions });
+      return apiFetch(endpoint, params, { ...fetchOptions, retries: retries - 1 });
     }
     
     // Check for error responses
     if (!response.ok) {
-      const error = new Error(data.detail || response.statusText || 'Request failed');
+      const error = new Error(data.detail || data.message || response.statusText || 'Request failed');
       error.status = response.status;
       error.data = data;
+      console.error('API Error:', error);
       throw error;
     }
     
