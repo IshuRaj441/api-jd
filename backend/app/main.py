@@ -20,6 +20,23 @@ from app.db.session import get_db
 
 app = FastAPI(title="API JD")
 
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "https://api-jd.vercel.app",
+        "https://api-jd-ishuraj441.vercel.app"
+    ],
+    allow_origin_regex=r"https://.*\.vercel\.app",
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["Content-Disposition"],
+    max_age=600
+)
+
 # Legacy profile endpoint for backward compatibility - must be defined before other routes
 @app.get("/profile")
 async def legacy_profile():
@@ -82,19 +99,6 @@ async def log_requests(request: Request, call_next: Callable):
     
     return response
 
-# Configure CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",  # Local frontend
-        "https://api-jd-1-9vjq.onrender.com",  # Render backend
-        "https://api-qzv8nceuf-ishuraj441s-projects.vercel.app",  # Frontend URL
-        "https://api-qzv8nceuf-ishuraj441s-projects.vercel.app"  # Frontend URL without trailing slash
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # Root endpoint
 @app.get("/favicon.ico", include_in_schema=False)
