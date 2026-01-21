@@ -1,5 +1,5 @@
 // API Configuration
-import { API_BASE } from '@/config/api';
+import { API_BASE_URL } from '@/config/api';
 
 /**
  * Helper function to create a properly formatted URL with query parameters
@@ -12,7 +12,7 @@ const createUrl = (endpoint, params = {}) => {
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
   
   // Create URL object with the base URL
-  const url = new URL(cleanEndpoint, API_BASE);
+  const url = new URL(cleanEndpoint, API_BASE_URL);
   
   // Add query parameters if provided
   if (params) {
