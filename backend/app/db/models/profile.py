@@ -1,6 +1,5 @@
-from sqlalchemy import Column, Integer, String, DateTime, Text, Index
+from sqlalchemy import Column, Integer, String, DateTime, Text, Index, JSON
 from sqlalchemy.sql import func
-from sqlalchemy.dialects.postgresql import JSONB
 from typing import Dict, Any, Optional
 
 from app.db.base_class import Base
@@ -87,10 +86,10 @@ class Profile(Base):
         comment="URL to the user's profile picture"
     )
     
-    metadata_ = Column(
-        JSONB,
+    profile_metadata = Column(
+        JSON,
         nullable=True,
-        name="metadata",
+        server_default='{}',
         comment="Additional metadata in JSON format"
     )
     
@@ -133,7 +132,9 @@ class Profile(Base):
             "profile_picture_url": self.profile_picture_url,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
-            "metadata": self.metadata_ or {}
+            "profile_metadata": self.profile_metadata or {},
+            # For backward compatibility
+            "metadata": self.profile_metadata or {}
         }
         
     def update_from_dict(self, data: Dict[str, Any]) -> None:

@@ -73,7 +73,11 @@ async def get_projects(
             skill_lower = skill.lower()
             filtered_projects = [
                 project for project in projects_db.values()
-                if any(skill_lower in s.lower() for s in project["skills"])
+                if "skills" in project and any(
+                    skill_lower in s.lower() 
+                    for s in project["skills"] 
+                    if isinstance(s, str)
+                )
             ]
             return filtered_projects
             

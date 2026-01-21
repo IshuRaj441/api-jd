@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
@@ -7,35 +8,56 @@ from app.crud.profile import (
     get_profile, get_profile_by_email, get_profiles,
     create_profile, update_profile, delete_profile
 )
-from app.schemas.profile import Profile, ProfileCreate, ProfileUpdate
+from app.schemas.profile import Profile, ProfileCreate, ProfileUpdate, ErrorResponse
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
-@router.get("/", response_model=Profile, summary="Get my profile")
+@router.get(
+    "/", 
+    response_model=Profile, 
+    responses={
+        200: {"description": "Profile retrieved successfully"},
+        404: {"model": ErrorResponse, "description": "Profile not found"},
+        500: {"model": ErrorResponse, "description": "Internal server error"}
+    },
+    summary="Get my profile"
+)
 def read_profile(db: Session = Depends(get_db)):
     """
     Get the current user's profile.
     
     Returns the profile information of the currently authenticated user.
+    In a real application, you would get the current user's ID from the auth token.
+    For now, we return the first profile or a 404 if none exists.
     """
-    # In a real app, you would get the current user's ID from the auth token
-    # For now, we'll just return the first profile or create a default one
-    profile = get_profiles(db, skip=0, limit=1)
-    if not profile:
-        # Create a default profile if none exists
-        profile_in = ProfileCreate(
-            name="Ishu Raj",
-            email="ishuraj441@gmail.com",
-            title="Full Stack Developer",
-            location="India",
-            about="Passionate developer building amazing things with code.",
-            github_url="https://github.com/IshuRaj441",
-            linkedin_url="https://linkedin.com/in/ishuraj176",
-            twitter_url="https://twitter.com/ishuraj176",
-            profile_picture_url="https://github.com/IshuRaj441.png"
+    try:
+        # Get the first profile
+        profiles = get_profiles(db, skip=0, limit=1)
+        if not profiles:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail={
+                    "success": False,
+                    "error": "No profile found",
+                    "error_code": "profile_not_found",
+                    "details": "Please create a profile first"
+                }
+            )
+        return profiles[0]
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error retrieving profile: {str(e)}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={
+                "success": False,
+                "error": "Internal server error",
+                "error_code": "internal_server_error",
+                "details": "An error occurred while retrieving the profile"
+            }
         )
-        return create_profile(db=db, obj_in=profile_in)
-    return profile[0]
 
 @router.get("/all", response_model=List[Profile], summary="List all profiles")
 def read_profiles(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
