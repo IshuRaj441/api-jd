@@ -11,7 +11,7 @@ View my complete resume: [Ishu Raj's Resume](https://docs.google.com/document/d/
 | Environment | URL | Status |
 |-------------|-----|--------|
 | Production API | [https://api-jd.onrender.com](https://api-jd.onrender.com) | [![API Status](https://img.shields.io/website?down_message=offline&label=status&up_message=online&url=https%3A%2F%2Fapi-jd.onrender.com%2Fhealth)](https://api-jd.onrender.com/health) |
-| Production Frontend | [https://api-jd.vercel.app](https://api-jd.vercel.app) | [![Frontend Status](https://img.shields.io/website?down_message=offline&label=status&up_message=online&url=https%3A%2F%2Fapi-jd.vercel.app)](https://api-jd.vercel.app) |
+| Production Frontend | [https://api-jd-w6op-q5z7f2bzx-ishuraj441s-projects.vercel.app/](https://api-jd-w6op-q5z7f2bzx-ishuraj441s-projects.vercel.app/) | [![Frontend Status](https://img.shields.io/website?down_message=offline&label=status&up_message=online&url=https%3A%2F%2Fapi-jd.vercel.app)](https://api-jd.vercel.app) |
 
 ## 🏗️ System Architecture
 
