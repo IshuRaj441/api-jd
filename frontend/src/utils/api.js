@@ -15,13 +15,21 @@ const createUrl = (endpoint, params = {}) => {
   // Remove leading/trailing slashes from endpoint
   const cleanEndpoint = endpoint.replace(/^\/+|\/+$/g, '');
   
-  // Create URL object with the base URL and version
+  // Create URL object with the base URL
   const baseUrl = new URL(API_BASE_URL);
-  const pathSegments = [baseUrl.pathname.replace(/\/+$/, ''), API_VERSION, cleanEndpoint].filter(Boolean);
+  
+  // Build the path segments, ensuring no double slashes
+  const pathSegments = [
+    baseUrl.pathname.replace(/^\/+|\/+$/g, ''), // Clean base path
+    API_VERSION,
+    cleanEndpoint
+  ].filter(Boolean);
+  
+  // Create the URL with the proper path
   const url = new URL(pathSegments.join('/'), baseUrl.origin);
   
   // Add query parameters if provided
-  if (params) {
+  if (params && typeof params === 'object') {
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         if (Array.isArray(value)) {
@@ -53,7 +61,7 @@ const defaultHeaders = {
  * @param {number} [retries=2] - Number of retry attempts
  * @returns {Promise<*>} The API response data
  */
-const apiFetch = async (endpoint, { params = {}, retries = 2, ...fetchOptions } = {}) => {
+const apiFetch = async (endpoint, params = {}, { retries = 2, ...fetchOptions } = {}) => {
   const url = createUrl(endpoint, params);
   
   const requestOptions = {
@@ -112,9 +120,12 @@ export const fetchProfile = async () => {
  */
 export const fetchProjects = async (skill = null) => {
   const params = {};
-  if (skill) params.skill = skill;
+  if (skill) {
+    params.skill = skill;
+  }
   
-  const data = await apiFetch('projects', { params });
+  // Pass params directly to apiFetch, which will be handled by createUrl
+  const data = await apiFetch('projects', params);
   return Array.isArray(data) ? data : [];
 };
 
