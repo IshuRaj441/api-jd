@@ -1,10 +1,23 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException, status
 from typing import Dict, Any
 import logging
+from pydantic import BaseModel
 
-from app.db.session import get_db
-from app.schemas.profile import ProfileResponse, ErrorResponse
+class ProfileResponse(BaseModel):
+    id: int
+    name: str
+    email: str
+    title: str
+    location: str
+    about: str
+    github_url: str
+    linkedin_url: str
+    portfolio_url: str
+    created_at: str
+    updated_at: str
+
+class ErrorResponse(BaseModel):
+    detail: str
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -17,7 +30,7 @@ router = APIRouter()
         500: {"model": ErrorResponse, "description": "Internal server error"}
     }
 )
-async def get_profile(db: Session = Depends(get_db)) -> Dict[str, Any]:
+async def get_profile() -> Dict[str, Any]:
     """
     Get the current user's profile information.
     
@@ -33,13 +46,12 @@ async def get_profile(db: Session = Depends(get_db)) -> Dict[str, Any]:
             "about": "Passionate developer building amazing things with code.",
             "github_url": "https://github.com/IshuRaj441",
             "linkedin_url": "https://www.linkedin.com/in/ishu-raj-13b840291/",
-            "portfolio_url": "",
+            "portfolio_url": "https://api-jd-ishuraj441.vercel.app/",
             "created_at": "2024-01-21T00:00:00",
             "updated_at": "2024-01-21T00:00:00"
         }
     except Exception as e:
-        logger.error(f"Error retrieving profile: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while retrieving the profile"
+            detail=f"An error occurred while retrieving the profile: {str(e)}"
         )

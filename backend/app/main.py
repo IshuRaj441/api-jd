@@ -27,13 +27,13 @@ from typing import List
 # Get allowed origins from environment variable or use defaults
 ALLOWED_ORIGINS = os.getenv(
     "ALLOWED_ORIGINS",
-    "http://localhost:3000,http://localhost:5173,https://api-jd.vercel.app,https://api-jd-ishuraj441.vercel.app"
+    "http://localhost:3000,http://localhost:5173,https://api-jd.vercel.app,https://api-jd-ishuraj441.vercel.app,https://api-jd-w6op-72n027wu5-ishuraj441s-projects.vercel.app"
 ).split(",")
 
 # Get origin regex from environment variable or use default
 ALLOWED_ORIGIN_REGEX = os.getenv(
     "ALLOWED_ORIGIN_REGEX",
-    r"https?://(localhost|api-jd.*\.vercel\.app|api-jd\.onrender\.com)"
+    r"https?://(localhost|api-jd.*\.vercel\.app|api-jd-ishuraj441.*\.vercel\.app|api-jd\.onrender\.com)"
 )
 
 app.add_middleware(
