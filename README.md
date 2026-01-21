@@ -8,10 +8,21 @@ View my complete resume: [Ishu Raj's Resume](https://docs.google.com/document/d/
 
 ## 🌐 Live Deployment
 
-| Environment | URL | Status |
-|-------------|-----|--------|
-| Production API | [https://api-jd.onrender.com](https://api-jd.onrender.com) | [![API Status](https://img.shields.io/website?down_message=offline&label=status&up_message=online&url=https%3A%2F%2Fapi-jd.onrender.com%2Fhealth)](https://api-jd.onrender.com/health) |
-| Production Frontend | [https://api-jd-w6op-q5z7f2bzx-ishuraj441s-projects.vercel.app/](https://api-jd-w6op-q5z7f2bzx-ishuraj441s-projects.vercel.app/) | [![Frontend Status](https://img.shields.io/website?down_message=offline&label=status&up_message=online&url=https%3A%2F%2Fapi-jd.vercel.app)](https://api-jd.vercel.app) |
+### Production Environment
+
+| Service | URL | Status |
+|---------|-----|--------|
+| **API Base URL** | [https://api-jd.onrender.com](https://api-jd.onrender.com) | [![API Status](https://img.shields.io/website?down_message=offline&label=status&up_message=online&url=https%3A%2F%2Fapi-jd.onrender.com%2Fhealth)](https://api-jd.onrender.com/health) |
+| **API Documentation** | [Swagger UI](https://api-jd.onrender.com/docs) • [ReDoc](https://api-jd.onrender.com/redoc) | - |
+| **Frontend** | [https://api-jd.vercel.app](https://api-jd.vercel.app) | [![Frontend Status](https://img.shields.io/website?down_message=offline&label=status&up_message=online&url=https%3A%2F%2Fapi-jd.vercel.app)](https://api-jd.vercel.app) |
+| **GitHub Repository** | [github.com/IshuRaj441/api-jd](https://github.com/IshuRaj441/api-jd) | - |
+
+### API Endpoints
+- **Base URL**: `https://api-jd.onrender.com/api/v1`
+- **Health Check**: `GET /health`
+- **Profile**: `GET /profile`
+- **Projects**: `GET /projects`
+- **Project Details**: `GET /projects/{id}`
 
 ## 🏗️ System Architecture
 
