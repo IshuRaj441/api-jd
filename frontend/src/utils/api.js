@@ -1,18 +1,24 @@
 // API Configuration
-import { API_BASE_URL } from '@/config/api';
+import { API_BASE } from '@/config/api';
+
+// Base API path
+const API_BASE_URL = API_BASE.endsWith('/') ? API_BASE : `${API_BASE}/`;
+const API_VERSION = 'api/v1';
 
 /**
  * Helper function to create a properly formatted URL with query parameters
- * @param {string} endpoint - The API endpoint (e.g., '/profile', 'projects')
+ * @param {string} endpoint - The API endpoint (e.g., 'profile', 'projects')
  * @param {Object} [params={}] - Optional query parameters
  * @returns {string} Fully formatted URL
  */
 const createUrl = (endpoint, params = {}) => {
-  // Remove leading slash from endpoint if present
-  const cleanEndpoint = endpoint.startsWith('/') ? endpoint.substring(1) : endpoint;
+  // Remove leading/trailing slashes from endpoint
+  const cleanEndpoint = endpoint.replace(/^\/+|\/+$/g, '');
   
-  // Create URL object with the base URL
-  const url = new URL(cleanEndpoint, API_BASE_URL);
+  // Create URL object with the base URL and version
+  const baseUrl = new URL(API_BASE_URL);
+  const pathSegments = [baseUrl.pathname.replace(/\/+$/, ''), API_VERSION, cleanEndpoint].filter(Boolean);
+  const url = new URL(pathSegments.join('/'), baseUrl.origin);
   
   // Add query parameters if provided
   if (params) {
@@ -96,14 +102,9 @@ const apiFetch = async (endpoint, { params = {}, retries = 2, ...fetchOptions } 
  * @returns {Promise<Object>} User profile data
  */
 export const fetchProfile = async () => {
-  return apiFetch('/profile');
+  return apiFetch('profile');
 };
 
-/**
- * Fetch projects with optional skill filter
- * @param {string} [skill] - Optional skill to filter projects
- * @returns {Promise<Array>} Array of projects
- */
 /**
  * Fetches projects with optional skill filter
  * @param {string} [skill] - Optional skill to filter projects
@@ -113,8 +114,18 @@ export const fetchProjects = async (skill = null) => {
   const params = {};
   if (skill) params.skill = skill;
   
-  const data = await apiFetch('/projects', { params });
+  const data = await apiFetch('projects', { params });
   return Array.isArray(data) ? data : [];
+};
+
+/**
+ * Fetches a specific project by ID
+ * @param {string} projectId - The ID of the project to fetch
+ * @returns {Promise<Object>} Project data
+ */
+export const fetchProjectById = async (projectId) => {
+  if (!projectId) throw new Error('Project ID is required');
+  return apiFetch(`projects/${projectId}`);
 };
 
 /**

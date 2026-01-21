@@ -29,7 +29,7 @@ app.add_middleware(
         "https://api-jd.vercel.app",
         "https://api-jd-ishuraj441.vercel.app"
     ],
-    allow_origin_regex=r"https://.*\.vercel\.app",
+    allow_origin_regex=r"https?://(localhost|api-jd.*\.vercel\.app|api-jd\.onrender\.com)",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
