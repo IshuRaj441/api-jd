@@ -3,6 +3,9 @@
 ## 📌 Overview
 Me-API Playground is a full-stack application developed as part of the Track A assessment. This project showcases modern API design principles, efficient database modeling, and seamless deployment strategies. The application serves as a professional portfolio platform with a focus on clean architecture and maintainable code.
 
+## 📄 Resume
+View my complete resume: [Ishu Raj's Resume](https://docs.google.com/document/d/1rHJgQOykyGm9F88Q9fR3jHr4gkSQvtR4eiUgtZf9F1s/edit?usp=sharing)
+
 ## 🌐 Live Deployment
 
 | Environment | URL | Status |
@@ -69,7 +72,7 @@ graph TD
 
 ### Base URL
 ```
-https://me-api-playground.onrender.com
+https://api-jd.onrender.com/
 ```
 
 ### Authentication
@@ -78,23 +81,7 @@ https://me-api-playground.onrender.com
 ### Rate Limiting
 - Default: 100 requests per minute per IP address
 
-### Profile
-- `GET /profile` - Get profile information
-- `POST /profile` - Create profile
-- `PUT /profile` - Update profile
 
-### Projects
-- `GET /projects` - List all projects
-- `GET /projects?skill={skill}` - Filter projects by skill
-
-### Skills
-- `GET /skills/top` - Get top skills
-
-### Search
-- `GET /search?q={query}` - Search across projects and skills
-
-### Health
-- `GET /health` - Health check endpoint
 
 ## 🗃️ Database Schema
 
@@ -428,8 +415,8 @@ LOG_LEVEL=INFO
 
 #### Frontend (`.env.production`)
 ```env
-VITE_API_BASE_URL=https://your-api-domain.com
-VITE_ENV=production
+VITE_API_BASE_URL= https://api-jd.onrender.com/ 
+VITE_ENV=production = https://vercel.com/ishuraj441s-projects/api-jd-w6op/44Tb8H6upwThY2SjfZSH8PCH5F9B
 ```
 
 ### Backend Deployment (Render)
@@ -452,11 +439,11 @@ VITE_ENV=production
 5. Deploy
 
 ## Live URLs
-- **Backend API**: [https://your-render-app.onrender.com](https://your-render-app.onrender.com)
-- **Frontend**: [https://your-netlify-app.netlify.app](https://your-netlify-app.netlify.app)
+- **Backend API**: https://api-jd.onrender.com/
+- **Frontend** :  https://api-jd-w6op-q5z7f2bzx-ishuraj441s-projects.vercel.app/
 
 ## Resume
-[Your Resume Link](https://drive.google.com/your-resume-link)
+[Your Resume Link](https://docs.google.com/document/d/1rHJgQOykyGm9F88Q9fR3jHr4gkSQvtR4eiUgtZf9F1s/edit?tab=t.0)
 
 ## Remarks
 - The application demonstrates CRUD operations for a profile and projects
@@ -541,14 +528,6 @@ cd frontend
 npm run build
 ```
 
-## Live URLs
-
-- **Frontend**: [https://me-api-playground.vercel.app](https://me-api-playground.vercel.app)
-- **Backend**: [https://me-api-backend.onrender.com](https://me-api-backend.onrender.com)
-
-## Resume
-
-[View my resume](https://drive.google.com/your-resume-link)
 
 ## Remarks
 

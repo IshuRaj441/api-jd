@@ -20,16 +20,26 @@ from app.db.session import get_db
 
 app = FastAPI(title="API JD")
 
-# Configure CORS
+# Configure CORS with environment variables
+import os
+from typing import List
+
+# Get allowed origins from environment variable or use defaults
+ALLOWED_ORIGINS = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:3000,http://localhost:5173,https://api-jd.vercel.app,https://api-jd-ishuraj441.vercel.app"
+).split(",")
+
+# Get origin regex from environment variable or use default
+ALLOWED_ORIGIN_REGEX = os.getenv(
+    "ALLOWED_ORIGIN_REGEX",
+    r"https?://(localhost|api-jd.*\.vercel\.app|api-jd\.onrender\.com)"
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "https://api-jd.vercel.app",
-        "https://api-jd-ishuraj441.vercel.app"
-    ],
-    allow_origin_regex=r"https?://(localhost|api-jd.*\.vercel\.app|api-jd\.onrender\.com)",
+    allow_origins=ALLOWED_ORIGINS,
+    allow_origin_regex=ALLOWED_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
