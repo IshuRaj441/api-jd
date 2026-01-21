@@ -32,9 +32,8 @@ async def get_profile(db: Session = Depends(get_db)) -> Dict[str, Any]:
             "location": "India",
             "about": "Passionate developer building amazing things with code.",
             "github_url": "https://github.com/IshuRaj441",
-            "linkedin_url": "https://linkedin.com/in/ishuraj176",
+            "linkedin_url": "https://www.linkedin.com/in/ishu-raj-13b840291/",
             "portfolio_url": "",
-            "twitter_url": "https://twitter.com/ishuraj176",
             "created_at": "2024-01-21T00:00:00",
             "updated_at": "2024-01-21T00:00:00"
         }

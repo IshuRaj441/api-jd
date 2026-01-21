@@ -50,7 +50,7 @@ async def get_projects(
             skill_lower = skill.lower()
             projects = [
                 p for p in projects 
-                if any(skill_lower in s.lower() for s in p["skills"])
+                if any(skill_lower == s.lower() for s in p["skills"])
             ]
             
         return projects
